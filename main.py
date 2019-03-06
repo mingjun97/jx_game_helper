@@ -44,11 +44,11 @@ if __name__ == "__main__":
                             min_level = m[k]['level']
                             min_key = k
                     if 'body_4' in k: # Dantian
-                        if m[k]['level'] < min_level + 3:
+                        if m[k]['level'] < min_level + 6:
                             min_level = m[k]['level']
                             min_key = k
                     if 'body_1' in k: # Xiuli
-                        if m[k]['level'] < min_level + 3:
+                        if m[k]['level'] < min_level + 6:
                             min_level = m[k]['level']
                             min_key = k
                     if 'body_1' in k: # Lianti
