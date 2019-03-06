@@ -44,18 +44,15 @@ if __name__ == "__main__":
                         if m[k]['level'] < min_level:
                             min_level = m[k]['level']
                             min_key = k
-                    if 'body_4' in k: # Dantian
-                        if m[k]['level'] < (min_level + 6):
-                            min_level = m[k]['level']
-                            min_key = k
-                    if 'body_1' in k: # Xiuli
-                        if m[k]['level'] < (min_level + 6):
-                            min_level = m[k]['level']
-                            min_key = k
-                    if 'body_5' in k: # Lianti
-                        if m[k]['level'] < (min_level + 2):
-                            min_level = m[k]['level']
-                            min_key = k
+                if m['body_4']['level'] < (min_level + 6): # dan tian
+                    min_level = m['body_4']['level']
+                    min_key = 'body_4'
+                if m['body_1']['level'] < (min_level + 6):
+                    min_level = m['body_1']['level']
+                    min_key = 'body_1'
+                if m['body_5']['level'] < (min_level + 2):
+                    min_level = m['body_5']['level']
+                    min_key = 'body_5'
                 req_up = request.Request(url, data=json.dumps(getTemplates('upgrade',min_key)).encode())
                 resp = request.urlopen(req_up).read().decode()
                 print('upgrade: %s from %d -> %d' % (min_key, min_level, min_level+1))
