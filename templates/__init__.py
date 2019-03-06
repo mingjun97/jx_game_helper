@@ -29,4 +29,6 @@ def getTemplates(action):
         tmp['action'] = 'handler/gameserver/meridian/UpgradeMeridian'
     elif "event"  in action:
         tmp['action'] = 'handler/gameserver/account/ShowEvents'
+    elif "move" in action:
+        tmp['action'] = 'handler/gameserver/map/WalkMove'
     return tmp
