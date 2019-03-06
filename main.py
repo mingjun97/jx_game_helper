@@ -21,6 +21,8 @@ if __name__ == "__main__":
     keeper.start()
     # print(request.urlopen(req_body))
     while True:
+        min_level = 999
+        min_key = "N/A"
         try:
             rep = json.loads(request.urlopen(req_events).read().decode())
             meridian_busy = False
@@ -30,13 +32,12 @@ if __name__ == "__main__":
                 if i.get('exts', False):
                     if 'meridian' in i['exts']:
                         meridian_busy = True
+                        pass
                     elif 'WalkMove' in i['exts']:
                         move_busy = True
                         # print(i['exts'])
             if not meridian_busy:
                 rep = json.loads(request.urlopen(req_body).read().decode())
-                min_level = 10
-                min_key = "merdian"
                 m = rep['meridians']
                 for k in m:
                     if 'meridian' in k:

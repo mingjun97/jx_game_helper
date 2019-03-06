@@ -16,8 +16,11 @@ def account_keeper():
 
     while True:
         # print("Heartbeat..")
-        rep = json.loads(request.urlopen(req).read().decode())
-        if rep['code'] != 0:
-            request.urlopen(login_request)
-            print("Heartbeat timeout, trying login..")
-        sleep(5)
+        try:
+            rep = json.loads(request.urlopen(req).read().decode())
+            if rep['code'] != 0:
+                request.urlopen(login_request)
+                print("Heartbeat timeout, trying login..")
+            sleep(5)
+        except:
+            pass

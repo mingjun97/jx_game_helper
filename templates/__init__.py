@@ -16,7 +16,7 @@ templates = {
 }
 
 def getTemplates(action, op=""):
-    tmp = templates
+    tmp = templates.copy()
     if "login" in action:
         tmp['action'] = "handler/gameserver/account/LoginGame"
     elif "heart" in action:
