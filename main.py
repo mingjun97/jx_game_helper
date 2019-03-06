@@ -21,7 +21,7 @@ if __name__ == "__main__":
     keeper.start()
     # print(request.urlopen(req_body))
     while True:
-        # try:
+        try:
             rep = json.loads(request.urlopen(req_events).read().decode())
             meridian_busy = False
             move_busy = False
@@ -43,15 +43,15 @@ if __name__ == "__main__":
                         if m[k]['level'] < min_level:
                             min_level = m[k]['level']
                             min_key = k
-                    if 'body_4' in k: # 丹田气海
+                    if 'body_4' in k: # Dantian
                         if m[k]['level'] < min_level + 3:
                             min_level = m[k]['level']
                             min_key = k
-                    if 'body_1' in k: # 袖里乾坤
+                    if 'body_1' in k: # Xiuli
                         if m[k]['level'] < min_level + 3:
                             min_level = m[k]['level']
                             min_key = k
-                    if 'body_1' in k: # 炼体成钢
+                    if 'body_1' in k: # Lianti
                         if m[k]['level'] < min_level - 3:
                             min_level = m[k]['level']
                             min_key = k
@@ -78,8 +78,8 @@ if __name__ == "__main__":
                 resp = request.urlopen(req_move).read().decode()
                 print("move: from %d_%d to %s" %(p[0], p[1], payload['des']))
             sleep(30)
-        # except KeyboardInterrupt:
-        #     break
-        # except:
-        #     pass
+        except KeyboardInterrupt:
+            break
+        except:
+            pass
     # sleep(20)
