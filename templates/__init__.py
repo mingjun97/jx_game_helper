@@ -15,7 +15,7 @@ templates = {
   "action": "placeholder"
 }
 
-def getTemplates(action):
+def getTemplates(action, op=""):
     tmp = templates
     if "login" in action:
         tmp['action'] = "handler/gameserver/account/LoginGame"
@@ -27,8 +27,10 @@ def getTemplates(action):
         tmp['action'] = "handler/gameserver/meridian/ShowEvents"
     elif "upgrade" in action:
         tmp['action'] = 'handler/gameserver/meridian/UpgradeMeridian'
+        tmp['id'] = op
     elif "event"  in action:
         tmp['action'] = 'handler/gameserver/account/ShowEvents'
     elif "move" in action:
         tmp['action'] = 'handler/gameserver/map/WalkMove'
+        tmp['des'] = op
     return tmp

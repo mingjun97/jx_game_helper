@@ -43,17 +43,19 @@ if __name__ == "__main__":
                         if m[k]['level'] < min_level:
                             min_level = m[k]['level']
                             min_key = k
-                    if 'body_4' in k:
+                    if 'body_4' in k: # 丹田气海
                         if m[k]['level'] < min_level + 3:
                             min_level = m[k]['level']
                             min_key = k
-                    if 'body_1' in k:
+                    if 'body_1' in k: # 袖里乾坤
                         if m[k]['level'] < min_level + 3:
                             min_level = m[k]['level']
                             min_key = k
-                payload = getTemplates('upgrade')
-                payload['id'] = min_key
-                req_up = request.Request(url, data=json.dumps(payload).encode())
+                    if 'body_1' in k: # 炼体成钢
+                        if m[k]['level'] < min_level - 3:
+                            min_level = m[k]['level']
+                            min_key = k
+                req_up = request.Request(url, data=json.dumps(getTemplates('upgrade',min_key)).encode())
                 resp = request.urlopen(req_up).read().decode()
                 print('upgrade: %s from %d -> %d' % (min_key, min_level, min_level+1))
             if not move_busy:
