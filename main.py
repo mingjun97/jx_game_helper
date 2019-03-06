@@ -52,7 +52,7 @@ if __name__ == "__main__":
                             min_level = m[k]['level']
                             min_key = k
                     if 'body_1' in k: # Lianti
-                        if m[k]['level'] < min_level - 3:
+                        if m[k]['level'] < min_level + 2:
                             min_level = m[k]['level']
                             min_key = k
                 req_up = request.Request(url, data=json.dumps(getTemplates('upgrade',min_key)).encode())
