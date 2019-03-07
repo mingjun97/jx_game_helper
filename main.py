@@ -5,6 +5,7 @@ from account import account_keeper
 from time import sleep
 import json
 
+from config import des, priority
 
 url = "http://xzcngame2.funthree.com:7578/gamen.j"
 req_body = request.Request(url, data=json.dumps(getTemplates('body')).encode())
@@ -13,7 +14,7 @@ req_body.add_header("Content-Type", "application/json")
 req_events = request.Request(url, data=json.dumps(getTemplates('event')).encode())
 req_events.add_header("Content-Type", "application/json")
 
-des = [208,254]
+
 
 if __name__ == "__main__":
     print("Starting up....")
@@ -44,15 +45,17 @@ if __name__ == "__main__":
                         if m[k]['level'] < min_level:
                             min_level = m[k]['level']
                             min_key = k
-                if m['body_4']['level'] < (min_level + 6): # dan tian
-                    min_level = m['body_4']['level']
+                if m['body_4']['level'] < (min_level + priority['body_4']): # dan tian
+                    min_level = m['body_4']['level'] - priority['body_4']
                     min_key = 'body_4'
-                if m['body_1']['level'] < (min_level + 6):
-                    min_level = m['body_1']['level']
+                if m['body_1']['level'] < (min_level + priority['body_1']):
+                    min_level = m['body_1']['level'] - priority['body_1']
                     min_key = 'body_1'
-                if m['body_5']['level'] < (min_level + 2):
-                    min_level = m['body_5']['level']
+                if m['body_5']['level'] < (min_level + priority['body_5']):
+                    min_level = m['body_5']['level'] - priority['body_5']
                     min_key = 'body_5'
+                if "body" in min_key:
+                    min_level += priority[min_key]
                 req_up = request.Request(url, data=json.dumps(getTemplates('upgrade',min_key)).encode())
                 resp = request.urlopen(req_up).read().decode()
                 print('upgrade: %s from %d -> %d' % (min_key, min_level, min_level+1))
