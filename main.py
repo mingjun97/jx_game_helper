@@ -14,6 +14,11 @@ req_body.add_header("Content-Type", "application/json")
 req_events = request.Request(url, data=json.dumps(getTemplates('event')).encode())
 req_events.add_header("Content-Type", "application/json")
 
+req_item = request.Request(url, data=json.dumps(getTemplates('item')).encode())
+req_item.add_header("Content-Type", "application/json")
+
+req_make = request.Request(url, data=json.dumps(getTemplates('make', 'sword_5')).encode())
+req_make.add_header("Content-Type", "application/json")
 
 
 if __name__ == "__main__":
@@ -28,15 +33,16 @@ if __name__ == "__main__":
             rep = json.loads(request.urlopen(req_events).read().decode())
             meridian_busy = False
             move_busy = False
+            refine_busy = False
             for i in rep['events']:
-                # print(i)
                 if i.get('exts', False):
-                    if 'meridian' in i['exts']:
+                    if 'meridian' in i['exts'] or 'magic' in i['exts']:
                         meridian_busy = True
                         pass
                     elif 'WalkMove' in i['exts']:
                         move_busy = True
-                        # print(i['exts'])
+                    elif 'weapon' in i['exts']:
+                        refine_busy = True
             if not meridian_busy:
                 rep = json.loads(request.urlopen(req_body).read().decode())
                 m = rep['meridians']
@@ -78,6 +84,17 @@ if __name__ == "__main__":
                 req_move = request.Request(url, data=json.dumps(payload).encode())
                 resp = request.urlopen(req_move).read().decode()
                 print("move: from %d_%d to %s" %(p[0], p[1], payload['des']))
+            if not refine_busy:
+                rep = json.loads(request.urlopen(req_item).read().decode())
+                for i in rep['weapons']:
+                    # print(rep['weapons'][i]['quality'])
+                    if rep['weapons'][i]['quality'] < 3:
+                        req_destroy = request.Request(url, data=json.dumps(getTemplates('destroy', i)).encode())
+                        request.urlopen(req_destroy)
+                        print("Destroy %s/%d" %(rep['weapons'][i]['weaponId'], rep['weapons'][i][quality]))
+                request.urlopen(req_make)
+                print("Make sword_5")
+
             sleep(30)
         except KeyboardInterrupt:
             break

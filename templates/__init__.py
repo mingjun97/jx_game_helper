@@ -33,4 +33,13 @@ def getTemplates(action, op=""):
     elif "move" in action:
         tmp['action'] = 'handler/gameserver/map/WalkMove'
         tmp['des'] = op
+    elif "make" in action:
+        tmp['action'] = 'handler/gameserver/weapon/MakeWeapon'
+        tmp['count'] = '1'
+        tmp['id'] = op
+    elif "item" in action:
+        tmp['action'] = 'handler/gameserver/item/PlayerWeaponItems'
+    elif "destroy" in action:
+        tmp['action'] = 'handler/gameserver/weapon/DestroyWeapon'
+        tmp['id'] = op
     return tmp
