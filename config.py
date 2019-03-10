@@ -7,3 +7,5 @@ priority = {
     "m_refine_4": "Zhu Jian Zhi Shu",
     "m_fortune_1": "Xuan Xue",
 }
+
+making_weapon = 'sword_5'

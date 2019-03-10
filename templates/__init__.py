@@ -42,4 +42,9 @@ def getTemplates(action, op=""):
     elif "destroy" in action:
         tmp['action'] = 'handler/gameserver/weapon/DestroyWeapon'
         tmp['id'] = op
+    elif "upweapon" in action:
+        tmp['action'] = 'handler/gameserver/weapon/UpgradeWeapon'
+        tmp['quality'] = '3'
+        tmp['lev'] = '10'
+        tmp['id'] = op
     return tmp

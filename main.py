@@ -5,7 +5,7 @@ from account import account_keeper
 from time import sleep
 import json
 
-from config import des, priority
+from config import des, priority, making_weapon
 
 url = "http://xzcngame2.funthree.com:7578/gamen.j"
 req_body = request.Request(url, data=json.dumps(getTemplates('body')).encode())
@@ -17,7 +17,7 @@ req_events.add_header("Content-Type", "application/json")
 req_item = request.Request(url, data=json.dumps(getTemplates('item')).encode())
 req_item.add_header("Content-Type", "application/json")
 
-req_make = request.Request(url, data=json.dumps(getTemplates('make', 'sword_5')).encode())
+req_make = request.Request(url, data=json.dumps(getTemplates('make', making_weapon)).encode())
 req_make.add_header("Content-Type", "application/json")
 
 
@@ -85,15 +85,25 @@ if __name__ == "__main__":
                 resp = request.urlopen(req_move).read().decode()
                 print("move: from %d_%d to %s" %(p[0], p[1], payload['des']))
             if not refine_busy:
+                collects = dict()
                 rep = json.loads(request.urlopen(req_item).read().decode())
                 for i in rep['weapons']:
                     # print(rep['weapons'][i]['quality'])
                     if rep['weapons'][i]['quality'] < 3:
                         req_destroy = request.Request(url, data=json.dumps(getTemplates('destroy', i)).encode())
                         request.urlopen(req_destroy)
-                        print("Destroy %s/%d" %(rep['weapons'][i]['weaponId'], rep['weapons'][i][quality]))
+                        # print("Destroy %s/%d" % (rep['weapons'][i]['weaponId'], rep['weapons'][i]['quality']))
+                    elif rep['weapons'][i]['weaponId'] == making_weapon:
+                        #TODO: Need to be done more precisely
+                        print(rep['weapons'][i]['quality'], rep['weapons'][i]['level'], i)
+                        if not collects.__contains__(rep['weapons'][i]['level']):
+                            collects[rep['weapons'][i]['level']] = i
+                        else:
+                            req_upweapon = request.Request(url, data=json.dumps(getTemplates('upweapon', i)).encode())
+                            request.urlopen(req_upweapon)
+                            print("Upgrade Weapon")
                 request.urlopen(req_make)
-                print("Make sword_5")
+                print("Make %s" % making_weapon)
 
             sleep(30)
         except KeyboardInterrupt:
