@@ -62,7 +62,8 @@ if __name__ == "__main__":
                     min_key = 'body_5'
                 if "body" in min_key:
                     min_level += priority[min_key]
-                req_up = request.Request(url, data=json.dumps(getTemplates('upgrade',min_key)).encode())
+                req_up = request.Request(url, data=json.dumps(getTemplates('upgrade', min_key)).encode())
+                req_up = request.Request(url, data=json.dumps(getTemplates('upgrade', 'm_refine_4')).encode())
                 resp = request.urlopen(req_up).read().decode()
                 print('upgrade: %s from %d -> %d' % (min_key, min_level, min_level+1))
             if not move_busy:
@@ -95,7 +96,7 @@ if __name__ == "__main__":
                         # print("Destroy %s/%d" % (rep['weapons'][i]['weaponId'], rep['weapons'][i]['quality']))
                     elif rep['weapons'][i]['weaponId'] == making_weapon:
                         #TODO: Need to be done more precisely
-                        print(rep['weapons'][i]['quality'], rep['weapons'][i]['level'], i)
+                        # print(rep['weapons'][i]['quality'], rep['weapons'][i]['level'], i)
                         if not collects.__contains__(rep['weapons'][i]['level']):
                             collects[rep['weapons'][i]['level']] = i
                         else:
