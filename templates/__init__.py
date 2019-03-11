@@ -47,4 +47,7 @@ def getTemplates(action, op=""):
         tmp['quality'] = '3'
         tmp['lev'] = '10'
         tmp['id'] = op
+    elif "upmagic" in action:
+        tmp['action'] = 'handler/gameserver/magic/UpgradeMagic'
+        tmp['id'] = op
     return tmp

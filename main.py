@@ -63,7 +63,7 @@ if __name__ == "__main__":
                 if "body" in min_key:
                     min_level += priority[min_key]
                 req_up = request.Request(url, data=json.dumps(getTemplates('upgrade', min_key)).encode())
-                req_up = request.Request(url, data=json.dumps(getTemplates('upgrade', 'm_refine_4')).encode())
+                req_up = request.Request(url, data=json.dumps(getTemplates('upmagic', 'm_refine_4')).encode())
                 resp = request.urlopen(req_up).read().decode()
                 print('upgrade: %s from %d -> %d' % (min_key, min_level, min_level+1))
             if not move_busy:
