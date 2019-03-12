@@ -1,4 +1,4 @@
-des = (120, 230)
+des = (115, 173)
 priority = {
     "body_1" : 6, # Xiu Li Qian Kun
     "body_4" : 6, # Dan Tian Qi Hai
@@ -10,4 +10,4 @@ priority = {
     "m_sword_1": "Yu Jian Fei Xing !!!!"
 }
 
-making_weapon = 'sword_5'
+making_weapon = 'sword_6'
