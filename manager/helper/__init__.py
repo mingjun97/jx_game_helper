@@ -39,6 +39,7 @@ class Account:
         self.tmpl['plform'] = plform
         self.interval = interval
         self.status = dict()
+        self.aim = None
         Thread(target=self.keeper).start()
 
     def getTemplate(self, action, op=''):
@@ -113,7 +114,67 @@ class Account:
             return self.send('getquest')['quests']
         # except:
         #     return {}
+    def setTarget(self, target):
+        self.aim = target
 
+    def getMeridians(self):
+        re = self.send('body')
+        ret = {
+            'meridians': [],
+            'body': []
+        }
+        m = re['meridians']
+        for k in m:
+            if 'meridian' in k:
+                ret['meridians'].append({
+                    'id': k,
+                    'level': m[k]['level']
+                })
+            elif 'body' in k:
+                ret['body'].append({
+                    'id': k,
+                    'level': m[k]['level']
+                })
+        return ret
+
+    def upgradeMerdian(self):
+        piorities = {
+            'body_4': 4,
+        }
+        d = self.getMeridians()
+        m = d['meridians']
+        b = d['body']
+        min_level = 100
+        min_key = ''
+        for i in m:
+            if i['level'] < min_level:
+                min_key = i['id']
+                min_level = i['level']
+        for i in b:
+            if (i['id'] in piorities) and i['level'] < min_level + piorities[i['id']]:
+                min_key = i['id']
+                min_level = i['level'] - piorities[i['id']]
+        self.send('upgrade', min_key)
+        print('upgrade %s' % min_key)
+
+
+    def move(self):
+        p = self.status['position'].split('_')
+        aim = self.aim.split('_')
+        p[0] = int(p[0])
+        p[1] = int(p[1])
+        aim[0] = int(aim[0])
+        aim[1] = int(aim[1])
+        if p[1] < aim[1]:
+            des = "%d_%d" %(p[0], p[1] + 1)
+        elif p[1] > aim[1]:
+            des = "%d_%d" %(p[0], p[1] - 1)
+        elif p[0] < aim[0]:
+            des = "%d_%d" % (p[0] + 1, p[1])
+        elif p[0] > aim[0]:
+            des = "%d_%d" %(p[0] - 1, p[1])
+        self.send('move', des)
+        print("Move to %s" % des)
     def keeper(self):
         while self.active:
             try:
@@ -137,10 +198,29 @@ class Account:
                 self.status['resource_max'] = re['resource_data']['resource_max']
                 self.status['dailyquest_ok_count'] = re['dailyquest_ok_count']
                 self.status['invest'] = re['user_other'].get("investProfits", {})
+
+                re = self.send('event')
+                meridian_busy = 0
+                move_busy = False
+                make_busy = False
+                for i in re['events']:
+                    if i.get('exts', False):
+                        if 'UpgradeMeridianDone.gv' in i['exts'] or 'UpgradeMagicDone.gv' in i['exts']:
+                            meridian_busy += 1
+                        elif 'WalkMove' in i['exts']:
+                            move_busy = True
+                        elif 'MakeWeaponDone.gv' in i['exts']:
+                            make_busy = True
+
+                self.status['study'] = meridian_busy
+                self.status['make'] = make_busy
+                if not move_busy and self.aim and self.aim != self.status['position']:
+                    self.move()
+                if meridian_busy == 0:
+                    self.upgradeMerdian()
             except:
                 try:
                     re = self.send('login')
-                    # print(re)
                 except:
                     pass
             sleep(self.interval)

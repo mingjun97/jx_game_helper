@@ -20,6 +20,9 @@ c = Account(
     'cbb5bdc9943ad5ce9d9b359f765f47ac63dbfdee49852726832591a827329602'
 )
 a = c
+a.setTarget('1_1')
+# print(a.getMeridians())
+# a.upgradeMerdian()
 while True:
     sleep(10)
     try:
@@ -29,11 +32,12 @@ while True:
             print('Get login award - %s' % a.status['name'])
         if a.status['dailyquest_ok_count'] > 0:
             quests = a.getQuest()
-            unfinished = 0
+            unfinished = 4
             for k in quests:
                 if 'dd00' in k:
-                    if quests[k]['state'] == 1:
-                        unfinished = max(unfinished, int(k[4:]) + 1)
+                    # print(quests[k])
+                    if 'finish' not in quests[k]['exts']:
+                        unfinished = min(unfinished, int(k[4:]))
                 elif 'd0' in k:
                     if quests[k]['steps'][0]['num'] >= quests[k]['steps'][0]['maxNum']:
                         a.send('finished', k)
