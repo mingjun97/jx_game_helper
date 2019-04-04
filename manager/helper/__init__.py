@@ -1,7 +1,7 @@
 from threading import Thread
 from urllib import request
 import json
-from time import sleep
+from time import sleep, localtime, strftime
 
 class Account:
     tmpl = {
@@ -27,20 +27,39 @@ class Account:
         "Accept-Encoding": "gzip, deflate",
         "Connection": "close",
     }
-    def __init__(self, url, user_id, device_id, apns_token, fversion='1.792', plform='iOS', interval=10):
+    def __init__(self, url, user_id, device_id, apns_token='', gdevice_id = None, fversion='1.792', plform='iOS', interval=10, **kwargs):
         self.active = True
         self.url = url
         self.user_id = user_id
         self.device_id = device_id
+        if gdevice_id:
+            self.gdevice_id = gdevice_id
+        else:
+            self.gdevice_id = device_id
         self.apns_token = apns_token
         self.tmpl['guid'] = user_id
         self.tmpl['gdeviceId'] = self.device_id
         self.tmpl['deviceId'] = self.device_id
         self.tmpl['plform'] = plform
-        self.interval = interval
+        self.interval = int(interval)
         self.status = dict()
         self.aim = None
+        self.log = ''
+        self.last_heartbeat = ''
+        if 'username' in kwargs:
+            self.username = kwargs['username']
+        else:
+            self.username = 'undefined'
         Thread(target=self.keeper).start()
+
+    def print(self, message):
+        self.log += '\n[%s] %s' % (
+                    strftime("%Y-%m-%d %H:%M:%S", localtime()),
+                    message
+        )
+
+    def getLogs(self):
+        return (self.last_heartbeat + self.log).replace('\n', '<br/>')
 
     def getTemplate(self, action, op=''):
         tmp = self.tmpl.copy()
@@ -95,6 +114,9 @@ class Account:
             tmp['npc'] = 'npc013'
         elif "getquest" in action:
             tmp['action'] = 'handler/gameserver/quest/ShowQuests'
+        elif "finished" in action:
+            tmp['action'] = 'handler/gameserver/quest/Finished'
+            tmp['id'] = op
         return tmp
 
     def send(self, action, op=''):
@@ -155,7 +177,7 @@ class Account:
                 min_key = i['id']
                 min_level = i['level'] - piorities[i['id']]
         self.send('upgrade', min_key)
-        print('upgrade %s' % min_key)
+        self.print('upgrade %s' % min_key)
 
 
     def move(self):
@@ -174,9 +196,29 @@ class Account:
         elif p[0] > aim[0]:
             des = "%d_%d" %(p[0] - 1, p[1])
         self.send('move', des)
-        print("Move to %s" % des)
+        self.print("Move to %s" % des)
+
+    def claim(self, position):
+        self.send("gottreasure", position)
+
+    def claim_daily(self):
+        quests = self.getQuest()
+        unfinished = 4
+        for k in quests:
+            if 'dd00' in k:
+                # print(quests[k])
+                if 'finish' not in quests[k]['exts']:
+                    unfinished = min(unfinished, int(k[4:]))
+            elif 'd0' in k:
+                if quests[k]['steps'][0]['num'] >= quests[k]['steps'][0]['maxNum']:
+                    a.send('finished', k)
+        if unfinished < 4:
+            self.send('dd', unfinished)
+            self.print('Claim daily award %d' % unfinished)
+
     def keeper(self):
         while self.active:
+            refresh = False
             try:
                 re = self.send('heartbeat')
                 # print(re)
@@ -218,9 +260,22 @@ class Account:
                     self.move()
                 if meridian_busy == 0:
                     self.upgradeMerdian()
+
+                if self.status['daily_award']:
+                    self.send('dailyaward')
+                    self.print('Get login award')
+                    refresh = True
+
+                if self.status['dailyquest_ok_count'] > 0:
+                    self.claim_daily()
+                    refresh = True
+                self.last_heartbeat = "Last Heartbeat: " + strftime("%Y-%m-%d %H:%M:%S", localtime()) + '<br/><br/>'
             except:
                 try:
                     re = self.send('login')
+                    refresh = True
+                    self.print('Login Success!')
                 except:
                     pass
-            sleep(self.interval)
+            if not refresh:
+                sleep(self.interval)
