@@ -11,7 +11,7 @@ templates = {
   "apnsOn": 0,
   "apnsToken": "ef83ffee4a4e8dd53dbcbb6ca732a3ac885380b4d78b72304498a0e0df985e0d",
   "gversion": "1.32",
-  "fversion": "1.791",
+  "fversion": "1.792",
   "action": "placeholder"
 }
 
@@ -50,4 +50,11 @@ def getTemplates(action, op=""):
     elif "upmagic" in action:
         tmp['action'] = 'handler/gameserver/magic/UpgradeMagic'
         tmp['id'] = op
+    elif "getmap" in action:
+        tmp['action'] = 'handler/gameserver/map/ShowMap'
+        tmp['x'] = int(op.split('_')[0])
+        tmp['y'] = int(op.split('_')[1])
+    elif "singlemap" in action:
+        tmp['action'] = 'handler/gameserver/map/ShowSingleMap'
+        tmp['coord'] = op
     return tmp
