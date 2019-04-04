@@ -43,9 +43,9 @@ def index():
     web = ''
     for k in accounts:
         web += """
-        <a href='/user/%s'>%s</a>
+        <a href='/user/%s'>%s (Active: %s)</a>
         <br/>
-        """ %(k, accounts[k].username)
+        """ %(k, accounts[k].username,  'Y' if accounts[k].active else 'N')
     return web
 
 app.run()
