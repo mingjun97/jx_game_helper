@@ -4,21 +4,6 @@ import json
 from time import sleep, localtime, strftime
 
 class Account:
-    tmpl = {
-      "appId": "com.akmob.xiuzhen",
-      "guid": "49-30-23A273",
-      "gdeviceId": "869B70F8-D9C5-43E0-9ED8-D2523F7B8E0D",
-      "deviceId": "869B70F8-D9C5-43E0-9ED8-D2523F7B8E0D",
-      "plform": "iOS",
-      "CountryCode": "CN",
-      "LanguageCode": "zh",
-      "DeviceModelDetail": "iPad8,1",
-      "apnsOn": 0,
-      "apnsToken": "ef83ffee4a4e8dd53dbcbb6ca732a3ac885380b4d78b72304498a0e0df985e0d",
-      "gversion": "1.32",
-      "fversion": "1.792",
-      "action": "placeholder"
-    }
     headers = {
         "Content-Type": "application/x-www-form-urlencoded;",
         "Origin": "file://",
@@ -28,10 +13,26 @@ class Account:
         "Connection": "close",
     }
     def __init__(self, url, user_id, device_id, apns_token='', gdevice_id = None, fversion='1.792', plform='iOS', interval=10, **kwargs):
+        self.tmpl = {
+              "appId": "com.akmob.xiuzhen",
+              "guid": "49-30-23A273",
+              "gdeviceId": "869B70F8-D9C5-43E0-9ED8-D2523F7B8E0D",
+              "deviceId": "869B70F8-D9C5-43E0-9ED8-D2523F7B8E0D",
+              "plform": "iOS",
+              "CountryCode": "CN",
+              "LanguageCode": "zh",
+              "DeviceModelDetail": "iPad8,1",
+              "apnsOn": 0,
+              "apnsToken": "ef83ffee4a4e8dd53dbcbb6ca732a3ac885380b4d78b72304498a0e0df985e0d",
+              "gversion": "1.32",
+              "fversion": "1.792",
+              "action": "placeholder"
+             }
         self.active = True
         self.url = url
         self.user_id = user_id
         self.device_id = device_id
+        self.tried = 0
         if gdevice_id:
             self.gdevice_id = gdevice_id
         else:
@@ -270,11 +271,19 @@ class Account:
                     self.claim_daily()
                     refresh = True
                 self.last_heartbeat = "Last Heartbeat: " + strftime("%Y-%m-%d %H:%M:%S", localtime()) + '<br/><br/>'
+                if self.tried > 0:
+                    self.print('Login Success!')
+                self.tried = 0
             except:
                 try:
                     re = self.send('login')
                     refresh = True
-                    self.print('Login Success!')
+                    self.print('Trying Login...')
+                    sleep(5)
+                    self.tried += 1
+                    if self.tried > 9:
+                        self.print('Login Failed! Exited!')
+                        self.active = False
                 except:
                     pass
             if not refresh:

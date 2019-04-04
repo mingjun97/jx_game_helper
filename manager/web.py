@@ -27,6 +27,7 @@ for i in a.split('\n'):
         tmp = dict()
         for k in lookuptable:
             tmp[k] = lookup(record, k)
+        # print(tmp)
         accounts[cur] = Account(**tmp)
 
 @app.route('/user/<string:id>')
