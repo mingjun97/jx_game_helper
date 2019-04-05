@@ -285,10 +285,10 @@ class Account:
                 self.status['make'] = make_busy
 
                 if self.automove and not move_busy:
-                    if self.status['position'] == '1_1':
+                    if self.status['position'] == '1_1' and self.aim == '1_1':
                         self.aim = '300_300'
                         self.print('[Automove] Set target as 300_300')
-                    else:
+                    elif self.aim == None or (self.status['position'] == '300_300' and self.aim == '300_300'):
                         self.aim = '1_1'
                         self.print('[Automove] Set target as 1_1')
                 if not move_busy and self.aim and self.aim != self.status['position']:
