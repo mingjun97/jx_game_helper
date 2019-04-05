@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, redirect
 import flask_login
 from helper import Account
 
@@ -9,8 +9,8 @@ app = Flask(__name__)
 lookuptable = {
     'username': 0,
     'user_id': 1,
-    'device_id': 2,
-    'gdevice_id': 3,
+    'device_id': 3,
+    'gdevice_id': 2,
     'interval': 4,
     'url': 5
 }
@@ -30,9 +30,28 @@ for i in a.split('\n'):
         # print(tmp)
         accounts[cur] = Account(**tmp)
 
+@app.route('/user/autostudy/<string:id>')
+def setAutostudy(id):
+    accounts[id].setAutostudy()
+    return redirect('/user/%s' % id)
+
+@app.route('/user/automove/<string:id>')
+def setAutomove(id):
+    accounts[id].setAutomove()
+    return redirect('/user/%s' % id)
+
 @app.route('/user/<string:id>')
 def user(id):
-    result = ''
+    result = 'Auto Study: <a href="/user/autostudy/%s">' % id + \
+        ('On' if accounts[id].autostudy else 'Off') + \
+    '</a><br/>'
+
+    result += 'Auto Move: <a href="/user/automove/%s">' % id + \
+        ('On' if accounts[id].automove else 'Off') + \
+    '</a><br/>'
+
+    result += 'Target: %s <br/>' % accounts[id].aim
+
     result += str(accounts[id].status)
     result += "<br/><br/>"
     result += accounts[id].getLogs()

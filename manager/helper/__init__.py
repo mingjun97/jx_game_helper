@@ -2,6 +2,8 @@ from threading import Thread
 from urllib import request
 import json
 from time import sleep, localtime, strftime
+import os
+cwd = os.getcwd()
 
 class Account:
     headers = {
@@ -33,6 +35,11 @@ class Account:
         self.user_id = user_id
         self.device_id = device_id
         self.tried = 0
+        try:
+            with open('%s/logs/%s.log' % (cwd, user_id), 'r') as logs:
+                self.log = logs.read()
+        except:
+            self.log = ''
         if gdevice_id:
             self.gdevice_id = gdevice_id
         else:
@@ -45,8 +52,9 @@ class Account:
         self.interval = int(interval)
         self.status = dict()
         self.aim = None
-        self.log = ''
         self.last_heartbeat = ''
+        self.autostudy = False
+        self.automove = False
         if 'username' in kwargs:
             self.username = kwargs['username']
         else:
@@ -54,10 +62,16 @@ class Account:
         Thread(target=self.keeper).start()
 
     def print(self, message):
-        self.log += '\n[%s] %s' % (
+        l = '\n[%s] %s' % (
                     strftime("%Y-%m-%d %H:%M:%S", localtime()),
                     message
         )
+        self.log += l
+        try:
+            with open('%s/logs/%s.log' % (cwd, self.user_id), 'a') as logs:
+                logs.write(l)
+        except:
+            pass
 
     def getLogs(self):
         return (self.last_heartbeat + self.log).replace('\n', '<br/>')
@@ -116,7 +130,7 @@ class Account:
         elif "getquest" in action:
             tmp['action'] = 'handler/gameserver/quest/ShowQuests'
         elif "finished" in action:
-            tmp['action'] = 'handler/gameserver/quest/Finished'
+            tmp['action'] = 'handler/gameserver/quest/CompleteQuest'
             tmp['id'] = op
         return tmp
 
@@ -217,6 +231,18 @@ class Account:
             self.send('dd', unfinished)
             self.print('Claim daily award %d' % unfinished)
 
+    def setAutostudy(self, enable=None):
+        if enable:
+            self.autostudy = enable
+        else:
+            self.autostudy = not self.autostudy
+
+    def setAutomove(self, enable=None):
+        if enable:
+            self.automove = enable
+        else:
+            self.automove = not self.automove
+
     def keeper(self):
         while self.active:
             refresh = False
@@ -257,9 +283,17 @@ class Account:
 
                 self.status['study'] = meridian_busy
                 self.status['make'] = make_busy
+
+                if self.automove:
+                    if self.status['position'] == '1_1':
+                        self.aim = '300_300'
+                        self.print('[Automove] Set target as 300_300')
+                    else:
+                        self.aim = '1_1'
+                        self.print('[Automove] Set target as 1_1')
                 if not move_busy and self.aim and self.aim != self.status['position']:
                     self.move()
-                if meridian_busy == 0:
+                if self.autostudy and meridian_busy == 0:
                     self.upgradeMerdian()
 
                 if self.status['daily_award']:
@@ -279,9 +313,9 @@ class Account:
                     re = self.send('login')
                     refresh = True
                     self.print('Trying Login...')
-                    sleep(5)
+                    sleep(3)
                     self.tried += 1
-                    if self.tried > 9:
+                    if self.tried > 3:
                         self.print('Login Failed! Exited!')
                         self.active = False
                 except:
