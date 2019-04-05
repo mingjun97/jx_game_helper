@@ -1,18 +1,18 @@
 
 templates = {
-  "appId": "com.akmob.xiuzhen",
-  "guid": "49-30-23A273",
-  "gdeviceId": "869B70F8-D9C5-43E0-9ED8-D2523F7B8E0D",
-  "deviceId": "869B70F8-D9C5-43E0-9ED8-D2523F7B8E0D",
-  "plform": "iOS",
-  "CountryCode": "US",
-  "LanguageCode": "zh",
-  "DeviceModelDetail": "iPad8,1",
-  "apnsOn": 0,
-  "apnsToken": "ef83ffee4a4e8dd53dbcbb6ca732a3ac885380b4d78b72304498a0e0df985e0d",
-  "gversion": "1.32",
-  "fversion": "1.792",
-  "action": "placeholder"
+  "fversion" : "1.792",
+  "apnsToken" : "addabc6459dc9208c32981749e9361a20a5fbc9f5c99413db66b093986720805",
+  "CountryCode" : "CN",
+  "DeviceModelDetail" : "iPhone10,3",
+  "appId" : "xxipa.4.497YH95P2T.89913700408b9b67f27b74f7278a13f3",
+  "deviceId" : "CF5AB40C-59F8-4E78-97FE-5A76923DC949",
+  "action" : "handler\/gameserver\/account\/Heartbeat",
+  "gdeviceId" : "774D2778-8C05-4E58-928B-0A5A1991221B",
+  "LanguageCode" : "zh",
+  "guid" : "49-69-10A140",
+  "plform" : "iOS",
+  "gversion" : "1.32",
+  "apnsOn" : 1
 }
 
 def getTemplates(action, op=""):
