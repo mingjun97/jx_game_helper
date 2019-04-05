@@ -284,7 +284,7 @@ class Account:
                 self.status['study'] = meridian_busy
                 self.status['make'] = make_busy
 
-                if self.automove:
+                if self.automove and not move_busy:
                     if self.status['position'] == '1_1':
                         self.aim = '300_300'
                         self.print('[Automove] Set target as 300_300')
