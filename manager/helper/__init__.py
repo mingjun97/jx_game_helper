@@ -40,6 +40,7 @@ class Account:
                 self.log = logs.read()
         except:
             self.log = ''
+        self.print("Server restarted.")
         if gdevice_id:
             self.gdevice_id = gdevice_id
         else:
@@ -152,6 +153,7 @@ class Account:
         # except:
         #     return {}
     def setTarget(self, target):
+        self.print('Set Target to %s' % target)
         self.aim = target
 
     def getMeridians(self):

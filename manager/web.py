@@ -49,13 +49,37 @@ def user(id):
     result += 'Auto Move: <a href="/user/automove/%s">' % id + \
         ('On' if accounts[id].automove else 'Off') + \
     '</a><br/>'
+    result += "<br/>"
 
-    result += 'Target: %s <br/>' % accounts[id].aim
+    result += 'Got treasure: <a href="/treasure/%s/N">' % id + \
+        'Go' + \
+    '</a><br/>'
+    result += "<br/>"
 
+    result += 'Target: <a href="/target/%s/N">%s</a> <br/>' % (id,accounts[id].aim)
+    result += "<br/>"
     result += str(accounts[id].status)
     result += "<br/><br/>"
     result += accounts[id].getLogs()
     return result
+
+@app.route('/treasure/<string:id>/<string:pos>')
+def getTreasure(id, pos='N'):
+    if '_' not in pos:
+        return "Please Specific The position parameters."
+    else:
+        try:
+            return str(accounts[id].send('gottreasure', pos)['drop'])
+        except:
+            return "Wrong destinition."
+
+@app.route('/target/<string:id>/<string:pos>')
+def setTarget(id, pos='N'):
+    if '_' not in pos:
+        return "Please Specific The destinition parameters."
+    else:
+        accounts[id].setTarget(pos)
+        return "Got it!"
 
 @app.route('/')
 def index():
