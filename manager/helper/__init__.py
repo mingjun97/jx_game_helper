@@ -37,7 +37,7 @@ class Account:
         self.tried = 0
         try:
             with open('%s/logs/%s.log' % (cwd, user_id), 'r') as logs:
-                self.log = logs.read()
+                self.log = "\n\n\n----------- Saved log ------------\n" + logs.read()
         except:
             self.log = ''
         self.print("Server restarted.")
@@ -67,7 +67,7 @@ class Account:
                     strftime("%Y-%m-%d %H:%M:%S", localtime()),
                     message
         )
-        self.log += l
+        self.log = l + self.log
         try:
             with open('%s/logs/%s.log' % (cwd, self.user_id), 'a') as logs:
                 logs.write(l)

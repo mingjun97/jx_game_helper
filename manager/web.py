@@ -3,6 +3,7 @@ import flask_login
 from helper import Account
 
 accounts = dict()
+rank_list = list()
 
 app = Flask(__name__)
 
@@ -24,6 +25,7 @@ for i in a.split('\n'):
     if len(i) > 5:
         record = i.split(',')
         cur = lookup(record, 'user_id')
+        rank_list.append(cur)
         tmp = dict()
         for k in lookuptable:
             tmp[k] = lookup(record, k)
@@ -42,12 +44,19 @@ def setAutomove(id):
 
 @app.route('/user/<string:id>')
 def user(id):
-    result = 'Auto Study: <a href="/user/autostudy/%s">' % id + \
+    result = ''
+    if not accounts[id].active:
+        result += '<a href="/restart/%s" style="color: red"> Restart This User </a><br/><br/>' % id
+    result += 'Auto Study: <a href="/user/autostudy/%s">' % id + \
         ('On' if accounts[id].autostudy else 'Off') + \
     '</a><br/>'
 
     result += 'Auto Move: <a href="/user/automove/%s">' % id + \
         ('On' if accounts[id].automove else 'Off') + \
+    '</a><br/>'
+    result += "<br/>"
+
+    result += 'Set Interval: <a href="/set-interval/%s/N"> Go' % id + \
     '</a><br/>'
     result += "<br/>"
 
@@ -81,14 +90,30 @@ def setTarget(id, pos='N'):
         accounts[id].setTarget(pos)
         return "Got it!"
 
+@app.route('/set-interval/<string:id>/<string:interval>')
+def setInterval(id, interval='N'):
+    if interval == 'N':
+        return 'Please specific the interval value.'
+    interval = int(interval)
+    accounts[id].interval = interval
+    accounts[id].print("Change Interval To %d, Interval will effect after next heartbeat" % interval)
+    return redirect('/user/' + id)
+
+@app.route('/restart/<string:id>')
+def restartUser(id):
+    tmp = dict()
+    for k in lookuptable:
+        tmp[k] = accounts[id].__getattr__(k)
+    accounts[id] = Account(**k)
+
 @app.route('/')
 def index():
     web = ''
-    for k in accounts:
+    for k in rank_list:
         web += """
-        <a href='/user/%s'>%s (Active: %s)</a>
+        <a href='/user/%s' style='color: %s'>%s</a>
         <br/>
-        """ %(k, accounts[k].username,  'Y' if accounts[k].active else 'N')
+        """ %(k,'green' if accounts[k].active else 'red', accounts[k].username)
     return web
 
 app.run()
