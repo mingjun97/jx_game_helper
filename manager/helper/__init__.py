@@ -216,7 +216,11 @@ class Account:
         self.print("Move to %s" % des)
 
     def claim(self, position):
-        self.send("gottreasure", position)
+        r = self.send("gottreasure", position)
+        try:
+            self.print('Got Treasuer: %s' % str(r['drop']))
+        except:
+            pass
 
     def claim_daily(self):
         quests = self.getQuest()
@@ -244,6 +248,13 @@ class Account:
             self.automove = enable
         else:
             self.automove = not self.automove
+
+    def gotTreasures(self):
+        try:
+            b = self.send('getquest')
+            self.claim(json.loads(b['quests']['m001']['exts'])['coord'])
+        except:
+            pass
 
     def keeper(self):
         while self.active:

@@ -16,6 +16,7 @@ lookuptable = {
     'url': 5
 }
 
+redirect_message = "<br/> Redirect in 2 seconds. <script> setTimeout(function(){window.history.back()}, 2000)</script>"
 def lookup(d, k):
     return d[lookuptable[k]]
 
@@ -74,11 +75,13 @@ def user(id):
 
 @app.route('/treasure/<string:id>/<string:pos>')
 def getTreasure(id, pos='N'):
+    accounts[id].gotTreasures()
+    return "Success!" + redirect_message
     if '_' not in pos:
         return "Please Specific The position parameters."
     else:
         try:
-            return str(accounts[id].send('gottreasure', pos)['drop'])
+            return str(accounts[id].send('gottreasure', pos)['drop']) + redirect_message
         except:
             return "Wrong destinition."
 
@@ -88,7 +91,7 @@ def setTarget(id, pos='N'):
         return "Please Specific The destinition parameters."
     else:
         accounts[id].setTarget(pos)
-        return "Got it!"
+        return "Got it!" + redirect_message
 
 @app.route('/set-interval/<string:id>/<string:interval>')
 def setInterval(id, interval='N'):
@@ -103,8 +106,9 @@ def setInterval(id, interval='N'):
 def restartUser(id):
     tmp = dict()
     for k in lookuptable:
-        tmp[k] = accounts[id].__getattr__(k)
-    accounts[id] = Account(**k)
+        tmp[k] = accounts[id].__dict__[k]
+    accounts[id] = Account(**tmp)
+    return redirect("/user/%s" % id)
 
 @app.route('/')
 def index():
@@ -116,4 +120,5 @@ def index():
         """ %(k,'green' if accounts[k].active else 'red', accounts[k].username)
     return web
 
-app.run()
+if __name__ = '__main__':
+    app.run()
