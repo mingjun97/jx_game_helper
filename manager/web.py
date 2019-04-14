@@ -120,5 +120,5 @@ def index():
         """ %(k,'green' if accounts[k].active else 'red', accounts[k].username)
     return web
 
-if __name__ = '__main__':
+if __name__ == '__main__':
     app.run()
