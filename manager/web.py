@@ -75,19 +75,27 @@ def user(id):
 
 @app.route('/treasure/<string:id>/<string:pos>')
 def getTreasure(id, pos='N'):
-    accounts[id].gotTreasures()
-    return "Success!" + redirect_message
-    if '_' not in pos:
-        return "Please Specific The position parameters."
-    else:
-        try:
-            return str(accounts[id].send('gottreasure', pos)['drop']) + redirect_message
-        except:
-            return "Wrong destinition."
+    b = accounts[id].send('item')['items']
+    c = 0
+    for i in b:
+        if b[i]['itemId'] == 'map_0001':
+            accounts[id].send('use', i)
+            accounts[id].gotTreasures()
+            c += 1
+    return "Success! For %d times." % c + redirect_message
+    # accounts[id].gotTreasures()
+    # if '_' not in pos:
+    #     return "Please Specific The position parameters."
+    # else:
+    #     try:
+    #         return str(accounts[id].send('gottreasure', pos)['drop']) + redirect_message
+    #     except:
+    #         return "Wrong destinition."
 
 @app.route('/target/<string:id>/<string:pos>')
 def setTarget(id, pos='N'):
     if '_' not in pos:
+        accounts[id].setTarget(None)
         return "Please Specific The destinition parameters."
     else:
         accounts[id].setTarget(pos)

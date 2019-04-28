@@ -133,6 +133,9 @@ class Account:
         elif "finished" in action:
             tmp['action'] = 'handler/gameserver/quest/CompleteQuest'
             tmp['id'] = op
+        elif "use" in action:
+            tmp['action'] = 'handler/gameserver/item/UseItem'
+            tmp['id'] = op
         return tmp
 
     def send(self, action, op=''):
@@ -153,7 +156,10 @@ class Account:
         # except:
         #     return {}
     def setTarget(self, target):
-        self.print('Set Target to %s' % target)
+        try:
+            self.print('Set Target to %s' % target)
+        except:
+            pass
         self.aim = target
 
     def getMeridians(self):
