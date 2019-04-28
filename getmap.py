@@ -30,28 +30,32 @@ count = 0
 
 def watch(i):
     global count
-    for j in range(5, 300, 9):
-        coord = "%d_%d" % (i, j)
-        getmap = request.Request(url,  data=json.dumps(getTemplates('getmap',coord)).encode(), headers=headers)
-        # print(request.urlopen(getmap).read().decode())
-        try:
-            rep = json.loads(request.urlopen(getmap).read().decode())
-        except:
-            sleep(3)
+    try:
+        for j in range(5, 300, 9):
+            coord = "%d_%d" % (i, j)
+            getmap = request.Request(url,  data=json.dumps(getTemplates('getmap',coord)).encode(), headers=headers)
+            # print(request.urlopen(getmap).read().decode())
             try:
                 rep = json.loads(request.urlopen(getmap).read().decode())
             except:
                 sleep(3)
-                rep = json.loads(request.urlopen(getmap).read().decode())
-        # print(rep)
-        for k in rep['worldMap']['walker_counts']:
-            getsinglemap = request.Request(url,  data=json.dumps(getTemplates('singlemap',k)).encode(), headers=headers)
-            rep_single = json.loads(request.urlopen(getsinglemap).read().decode())
-            # print(rep_single)
-            for r in rep_single['map_grid']['walkers']:
-                # print(r)
-                print("%s, %s, %s, %s" % (r['gridId'], r['walkerId'], r['walkerName'], r['exts']))
-    count -= 1
+                try:
+                    rep = json.loads(request.urlopen(getmap).read().decode())
+                except:
+                    sleep(3)
+                    rep = json.loads(request.urlopen(getmap).read().decode())
+            # print(rep)
+            for k in rep['worldMap']['walker_counts']:
+                getsinglemap = request.Request(url,  data=json.dumps(getTemplates('singlemap',k)).encode(), headers=headers)
+                rep_single = json.loads(request.urlopen(getsinglemap).read().decode())
+                # print(rep_single)
+                for r in rep_single['map_grid']['walkers']:
+                    # print(r)
+                    print("%s, %s, %s, %s" % (r['gridId'], r['walkerId'], r['walkerName'], r['exts']))
+    except:
+        pass
+    finally:
+        count -= 1
 
 for i in range(4, 300, 7):
     while count > 1 :
