@@ -237,8 +237,11 @@ class Account:
                 if 'finish' not in quests[k]['exts']:
                     unfinished = min(unfinished, int(k[4:]))
             elif 'd0' in k:
-                if quests[k]['steps'][0]['num'] >= quests[k]['steps'][0]['maxNum']:
-                    a.send('finished', k)
+                try:
+                    if quests[k]['steps'][0]['num'] >= quests[k]['steps'][0]['maxNum']:
+                        a.send('finished', k)
+                except:
+                    pass
         if unfinished < 4:
             self.send('dd', unfinished)
             self.print('Claim daily award %d' % unfinished)
