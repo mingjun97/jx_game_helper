@@ -27,7 +27,7 @@ class Account:
               "apnsOn": 0,
               "apnsToken": "ef83ffee4a4e8dd53dbcbb6ca732a3ac885380b4d78b72304498a0e0df985e0d",
               "gversion": "1.32",
-              "fversion": "1.792",
+              "fversion": "1.793",
               "action": "placeholder"
              }
         self.active = True
