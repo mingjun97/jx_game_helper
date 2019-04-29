@@ -13,7 +13,8 @@ lookuptable = {
     'device_id': 3,
     'gdevice_id': 2,
     'interval': 4,
-    'url': 5
+    'url': 5,
+    'device': 6
 }
 
 redirect_message = "<br/> Redirect in 2 seconds. <script> setTimeout(function(){window.history.back()}, 2000)</script>"

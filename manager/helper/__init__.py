@@ -50,6 +50,8 @@ class Account:
         self.tmpl['gdeviceId'] = self.device_id
         self.tmpl['deviceId'] = self.device_id
         self.tmpl['plform'] = plform
+        if 'device' in kwargs:
+            self.tmpl["DeviceModelDetail"] = kwargs['device'].replace('_', ',')
         self.interval = int(interval)
         self.status = dict()
         self.aim = None
