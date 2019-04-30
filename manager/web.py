@@ -85,13 +85,16 @@ def user(id):
     result += "<br/>"
 
     if 'unlock_weapons' in accounts[id].status:
-        result += 'Set automake weapon'
+        result += 'Set automake weapon(%d)' % accounts[id].refine_queue_capacity
         if accounts[id].weapon:
             result += '[<a href="/set-weapon/%s/Unset">%s</a>]' % (id, accounts[id].weapon)
         result += " : "
         for i in accounts[id].status['unlock_weapons']:
             result += '<a href="/set-weapon/%s/%s">%s</a>&nbsp;&nbsp;' % (id, i, i)
         result += '&nbsp;&nbsp;&nbsp;&nbsp; <a href="/only-best/%s" style="color: red"> only best!</a>' % id
+        result += '</br></br>'
+        result += 'Refine capacity: <a href="/up-weapon-capacity/%s">+1</a>'
+                '&nbsp;$nbsp;<a href="/down-weapon-capacity/%s">-1</a>' % (id, id)
     result += '</br></br>' + str(accounts[id].status)
     result += "<br/><br/>"
     result += accounts[id].getLogs()
@@ -107,6 +110,16 @@ def setWeapon(id, weapon):
         accounts[id].setWeapon(None)
     else:
         accounts[id].setWeapon(weapon)
+    return redirect('/user/%s' % id)
+
+@app.route('/up-weapon-capacity/<string:id>')
+def upWeaponCapicity(id):
+    accounts[id].refine_queue_capacity += 1
+    return redirect('/user/%s' % id)
+
+@app.route('/down-weapon-capacity/<string:id>')
+def downWeaponCapicity(id):
+    accounts[id].refine_queue_capacity -= 1
     return redirect('/user/%s' % id)
 
 @app.route('/treasure/<string:id>/<string:pos>')

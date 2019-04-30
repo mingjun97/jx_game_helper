@@ -5,7 +5,7 @@ from time import sleep, localtime, strftime
 import os
 cwd = os.getcwd()
 
-saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best']
+saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best', 'refine_queue_capacity']
 
 class Account:
     headers = {
@@ -38,6 +38,7 @@ class Account:
         self.device_id = device_id
         self.tried = 0
         self.only_best = 0
+        self.refine_queue_capacity = 1
         try:
             with open('%s/logs/%s.log' % (cwd, user_id), 'r') as logs:
                 self.log = "\n\n\n----------- Saved log ------------\n" + logs.read()
@@ -335,9 +336,9 @@ class Account:
                 self.status['study'] = meridian_busy
                 self.status['make'] = make_busy
 
-                if self.weapon and make_busy == 0:
+                if self.weapon and make_busy < self.refine_queue_capacity:
                     self.send('make', self.weapon)
-                    self.print('Make 1x%s' % self.weapon)
+                    self.print('Make 2x %s' % self.weapon)
                     collects = dict()
                     collects2 = dict()
                     try:
@@ -353,12 +354,14 @@ class Account:
                                     collects[wps[i]['level']] = i
                                 else:
                                     self.send('upweapon', i)
+                                    self.print('Upgrade %s - %s' % (wps[i]['weaponId'], wps[i]['quality']))
                                     collects.pop(wps[i]['level'])
                             else:
                                 if not collects2.__contains__(wps[i]['level']):
                                     collects2[wps[i]['level']] = i
                                 else:
                                     self.send('upweapon', i)
+                                    self.print('Upgrade %s - %s' % (wps[i]['weaponId'], wps[i]['quality']))
                                     collects2.pop(wps[i]['level'])
                     except:
                         pass
