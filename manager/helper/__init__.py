@@ -138,6 +138,9 @@ class Account:
         elif "upmagic" in action:
             tmp['action'] = 'handler/gameserver/magic/UpgradeMagic'
             tmp['id'] = op
+        elif "speedmagic" in action:
+            tmp['action'] = 'handler/gameserver/magic/SpeedupUpgradeMagic'
+            tmp['id'] = op
         elif "getmap" in action:
             tmp['action'] = 'handler/gameserver/map/ShowMap'
             tmp['x'] = int(op.split('_')[0])
@@ -346,7 +349,7 @@ class Account:
                         for i in wps:
                             if wps[i]['weaponId'] != self.weapon:
                                 continue
-                            if wps[i]['quality'] < (3 + self.only_best):
+                            if wps[i]['quality'] < (3 + self.only_best) and wps[i]['level'] == 0:
                                 self.send('destroy', i)
                                 continue
                             if wps[i]['quality'] == 3:
