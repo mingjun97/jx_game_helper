@@ -14,7 +14,8 @@ lookuptable = {
     'gdevice_id': 2,
     'interval': 4,
     'url': 5,
-    'device': 6
+    'device': 6,
+    'appId': 7
 }
 
 redirect_message = "<br/> Redirect in 2 seconds. <script> setTimeout(function(){window.history.back()}, 2000)</script>"
@@ -44,14 +45,27 @@ def setAutomove(id):
     accounts[id].setAutomove()
     return redirect('/user/%s' % id)
 
+@app.route('/user/<string:id>/save')
+def save(id):
+    accounts[id].saveConfig()
+    return redirect('/user/%s' % id)
+
+@app.route('/user/<string:id>/load')
+def load(id):
+    accounts[id].readConfig()
+    return redirect('/user/%s' % id)
+
 @app.route('/user/<string:id>')
 def user(id):
-    result = ''
+    result = '<h1>%s</h1>' % accounts[id].username
+    result += 'Save Config: <a href="/user/%s/save"> Save </a><br/>' % id
+
     if not accounts[id].active:
         result += '<a href="/restart/%s" style="color: red"> Restart This User </a><br/><br/>' % id
     result += 'Auto Study: <a href="/user/autostudy/%s">' % id + \
         ('On' if accounts[id].autostudy else 'Off') + \
     '</a><br/>'
+
 
     result += 'Auto Move: <a href="/user/automove/%s">' % id + \
         ('On' if accounts[id].automove else 'Off') + \
@@ -69,13 +83,35 @@ def user(id):
 
     result += 'Target: <a href="/target/%s/N">%s</a> <br/>' % (id,accounts[id].aim)
     result += "<br/>"
-    result += str(accounts[id].status)
+
+    if 'unlock_weapons' in accounts[id].status:
+        result += 'Set automake weapon'
+        if accounts[id].weapon:
+            result += '[<a href="/set-weapon/%s/Unset">%s</a>]' % (id, accounts[id].weapon)
+        result += " : "
+        for i in accounts[id].status['unlock_weapons']:
+            result += '<a href="/set-weapon/%s/%s">%s</a>&nbsp;&nbsp;' % (id, i, i)
+        result += '&nbsp;&nbsp;&nbsp;&nbsp; <a href="/only-best/%s" style="color: red"> only best!</a>'
+    result += '</br></br>' + str(accounts[id].status)
     result += "<br/><br/>"
     result += accounts[id].getLogs()
     return result
 
+@app.route('/only-best/<string:id>')
+def onlyBest(id):
+    accounts[id].only_best = 1
+
+@app.route('/set-weapon/<string:id>/<string:weapon>')
+def setWeapon(id, weapon):
+    if weapon == 'Unset':
+        accounts[id].setWeapon(None)
+    else:
+        accounts[id].setWeapon(weapon)
+    return redirect('/user/%s' % id)
+
 @app.route('/treasure/<string:id>/<string:pos>')
 def getTreasure(id, pos='N'):
+    accounts[id].gotTreasures()
     b = accounts[id].send('item')['items']
     c = 0
     for i in b:

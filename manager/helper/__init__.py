@@ -5,6 +5,8 @@ from time import sleep, localtime, strftime
 import os
 cwd = os.getcwd()
 
+saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best']
+
 class Account:
     headers = {
         "Content-Type": "application/x-www-form-urlencoded;",
@@ -35,6 +37,7 @@ class Account:
         self.user_id = user_id
         self.device_id = device_id
         self.tried = 0
+        self.only_best = 0
         try:
             with open('%s/logs/%s.log' % (cwd, user_id), 'r') as logs:
                 self.log = "\n\n\n----------- Saved log ------------\n" + logs.read()
@@ -52,17 +55,37 @@ class Account:
         self.tmpl['plform'] = plform
         if 'device' in kwargs:
             self.tmpl["DeviceModelDetail"] = kwargs['device'].replace('_', ',')
+        if 'appId' in kwargs and kwargs['appId'] != '':
+            self.tmpl['appId'] = kwargs['appId']
         self.interval = int(interval)
         self.status = dict()
         self.aim = None
         self.last_heartbeat = ''
         self.autostudy = False
         self.automove = False
+        self.weapon = None
         if 'username' in kwargs:
             self.username = kwargs['username']
         else:
             self.username = 'undefined'
+        try:
+            self.readConfig()
+        except:
+            pass
         Thread(target=self.keeper).start()
+
+    def readConfig(self):
+        with open('%s/configs/%s.config' % (cwd, self.user_id), 'r') as config:
+            c = json.loads(config.read())
+        for i in c:
+            self.__setattr__(i, c[i])
+
+    def saveConfig(self):
+        c = dict()
+        for i in saved_config:
+            c[i] = self.__getattribute__(i)
+        with open('%s/configs/%s.config' % (cwd, self.user_id), 'w') as config:
+            config.write(json.dumps(c))
 
     def print(self, message):
         l = '\n[%s] %s' % (
@@ -99,7 +122,7 @@ class Account:
             tmp['des'] = op
         elif "make" in action:
             tmp['action'] = 'handler/gameserver/weapon/MakeWeapon'
-            tmp['count'] = '1'
+            tmp['count'] = '2'
             tmp['id'] = op
         elif "item" in action:
             tmp['action'] = 'handler/gameserver/item/PlayerWeaponItems'
@@ -260,6 +283,10 @@ class Account:
         else:
             self.automove = not self.automove
 
+    def setWeapon(self, weapon):
+        self.weapon = weapon
+        self.print('set weapon to %s' % weapon)
+
     def gotTreasures(self):
         try:
             b = self.send('getquest')
@@ -295,19 +322,46 @@ class Account:
                 re = self.send('event')
                 meridian_busy = 0
                 move_busy = False
-                make_busy = False
+                make_busy = 0
                 for i in re['events']:
                     if i.get('exts', False):
                         if 'UpgradeMeridianDone.gv' in i['exts'] or 'UpgradeMagicDone.gv' in i['exts']:
                             meridian_busy += 1
-                        elif 'WalkMove' in i['exts']:
+                        elif 'WalkMove' in i['exts'] or 'Fly' in i['exts']:
                             move_busy = True
                         elif 'MakeWeaponDone.gv' in i['exts']:
-                            make_busy = True
+                            make_busy += 1
 
                 self.status['study'] = meridian_busy
                 self.status['make'] = make_busy
 
+                if self.weapon and make_busy == 0:
+                    self.send('make', self.weapon)
+                    self.print('Make 1x%s' % self.weapon)
+                    collects = dict()
+                    collects2 = dict()
+                    try:
+                        wps = self.send('item')['weapons']
+                        for i in wps:
+                            if wps[i]['weaponId'] != self.weapon:
+                                continue
+                            if wps[i]['quality'] < (3 + self.only_best):
+                                self.send('destroy', i)
+                                continue
+                            if wps[i]['quality'] == 3:
+                                if not collects.__contains__(wps[i]['level']):
+                                    collects[wps[i]['level']] = i
+                                else:
+                                    self.send('upweapon', i)
+                                    collects.pop(wps[i]['level'])
+                            else:
+                                if not collects2.__contains__(wps[i]['level']):
+                                    collects2[wps[i]['level']] = i
+                                else:
+                                    self.send('upweapon', i)
+                                    collects2.pop(wps[i]['level'])
+                    except:
+                        pass
                 if self.automove and not move_busy:
                     if self.status['position'] == '1_1' and self.aim == '1_1':
                         self.aim = '300_300'
