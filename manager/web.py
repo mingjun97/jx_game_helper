@@ -91,7 +91,7 @@ def user(id):
         result += " : "
         for i in accounts[id].status['unlock_weapons']:
             result += '<a href="/set-weapon/%s/%s">%s</a>&nbsp;&nbsp;' % (id, i, i)
-        result += '&nbsp;&nbsp;&nbsp;&nbsp; <a href="/only-best/%s" style="color: red"> only best!</a>'
+        result += '&nbsp;&nbsp;&nbsp;&nbsp; <a href="/only-best/%s" style="color: red"> only best!</a>' % id
     result += '</br></br>' + str(accounts[id].status)
     result += "<br/><br/>"
     result += accounts[id].getLogs()
