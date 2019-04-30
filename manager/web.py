@@ -93,8 +93,8 @@ def user(id):
             result += '<a href="/set-weapon/%s/%s">%s</a>&nbsp;&nbsp;' % (id, i, i)
         result += '&nbsp;&nbsp;&nbsp;&nbsp; <a href="/only-best/%s" style="color: red"> only best!</a>' % id
         result += '</br></br>'
-        result += 'Refine capacity: <a href="/up-weapon-capacity/%s">+1</a>'
-                '&nbsp;$nbsp;<a href="/down-weapon-capacity/%s">-1</a>' % (id, id)
+        result += 'Refine capacity: <a href="/up-weapon-capacity/%s">+1</a>' \
+                  '&nbsp;&nbsp;<a href="/down-weapon-capacity/%s">-1</a>' % (id, id)
     result += '</br></br>' + str(accounts[id].status)
     result += "<br/><br/>"
     result += accounts[id].getLogs()
