@@ -1,7 +1,7 @@
 from threading import Thread
 from urllib import request
 import json
-from time import sleep, localtime, strftime
+from time import sleep, localtime, strftime, time
 from random import random
 import os
 cwd = os.getcwd()
@@ -34,6 +34,7 @@ class Account:
               "action": "placeholder"
              }
         self.active = True
+        self.last_active = time()
         self.url = url
         self.user_id = user_id
         self.device_id = device_id
@@ -75,6 +76,15 @@ class Account:
         except:
             pass
         Thread(target=self.keeper).start()
+        Thread(target=self.monitor).start()
+
+
+    def monitor(self):
+        while self.active:
+            if (time() - self.last_active) > (self.interval * 3.0):
+                    Thread(target=self.keeper).start()
+                    self.print("Monitor detect potential timeout occurred. Perform positive restart!")
+            sleep(self.interval / 2.0)
 
     def readConfig(self):
         with open('%s/configs/%s.config' % (cwd, self.user_id), 'r') as config:
@@ -271,7 +281,7 @@ class Account:
                     if quests[k]['steps'][0]['num'] >= quests[k]['steps'][0]['maxNum']:
                         a.send('finished', k)
                         self.print("Claim %s" % k)
-                    return
+                        return
                 except:
                     pass
         if unfinished < 4:
@@ -303,6 +313,7 @@ class Account:
 
     def keeper(self):
         while self.active:
+            self.last_active = time()
             refresh = False
             try:
                 re = self.send('heartbeat')
@@ -389,11 +400,9 @@ class Account:
                 if self.status['daily_award']:
                     self.send('dailyaward')
                     self.print('Get login award')
-                    refresh = True
 
                 if self.status['dailyquest_ok_count'] > 0:
                     self.claim_daily()
-                    refresh = True
                 self.last_heartbeat = "Last Heartbeat: " + strftime("%Y-%m-%d %H:%M:%S", localtime()) + '<br/><br/>'
                 if self.tried > 0:
                     self.print('Login Success!')
