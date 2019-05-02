@@ -2,21 +2,22 @@ from threading import Thread
 from urllib import request
 import json
 from time import sleep, localtime, strftime
+from random import random
 import os
 cwd = os.getcwd()
 
-saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best', 'refine_queue_capacity']
+saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best', 'refine_queue_capacity', 'headers', 'tmpl']
 
 class Account:
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded;",
-        "Origin": "file://",
-        "User-Agent": "Mozilla/5.0 (iPad; CPU OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/16B92",
-        "Accept-Language": "en-us",
-        "Accept-Encoding": "gzip, deflate",
-        "Connection": "close",
-    }
     def __init__(self, url, user_id, device_id, apns_token='', gdevice_id = None, fversion='1.792', plform='iOS', interval=10, **kwargs):
+        self.headers = {
+            "Content-Type": "application/x-www-form-urlencoded;",
+            "Origin": "file://",
+            "User-Agent": "Mozilla/5.0 (iPad; CPU OS 12_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/16B92",
+            "Accept-Language": "en-us",
+            "Accept-Encoding": "gzip, deflate",
+            "Connection": "close",
+        }
         self.tmpl = {
               "appId": "com.akmob.xiuzhen",
               "guid": "49-30-23A273",
@@ -265,10 +266,12 @@ class Account:
                 # print(quests[k])
                 if 'finish' not in quests[k]['exts']:
                     unfinished = min(unfinished, int(k[4:]))
-            elif 'd0' in k:
+            elif k[:2] == 'd0':
                 try:
                     if quests[k]['steps'][0]['num'] >= quests[k]['steps'][0]['maxNum']:
                         a.send('finished', k)
+                        self.print("Claim %s" % k)
+                    return
                 except:
                     pass
         if unfinished < 4:
@@ -347,12 +350,15 @@ class Account:
                     try:
                         wps = self.send('item')['weapons']
                         for i in wps:
+                            sleep(random() * 2)
                             if wps[i]['weaponId'] != self.weapon:
                                 continue
                             if wps[i]['quality'] < (3 + self.only_best) and wps[i]['level'] == 0:
                                 self.send('destroy', i)
                                 continue
-                            if wps[i]['quality'] == 3:
+                            if int(wps[i]['level']) >= 8:
+                                continue
+                            if not self.only_best and wps[i]['quality'] == 3:
                                 if not collects.__contains__(wps[i]['level']):
                                     collects[wps[i]['level']] = i
                                 else:
@@ -405,4 +411,4 @@ class Account:
                 except:
                     pass
             if not refresh:
-                sleep(self.interval)
+                sleep(self.interval + random() * 4)
