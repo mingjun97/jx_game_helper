@@ -41,6 +41,7 @@ class Account:
         self.tried = 0
         self.only_best = 0
         self.refine_queue_capacity = 1
+        self.active_thread = 0
         try:
             with open('%s/logs/%s.log' % (cwd, user_id), 'r') as logs:
                 self.log = "\n\n\n----------- Saved log ------------\n" + logs.read()
@@ -312,7 +313,12 @@ class Account:
             pass
 
     def keeper(self):
+        self.active_thread += 1
+        me = self.active_thread
         while self.active:
+            if me != self.active_thread:
+                self.print("Duplicated thread! Thread-%d exited to avoid wasting!" % me)
+                return
             self.last_active = time()
             refresh = False
             try:
@@ -407,6 +413,7 @@ class Account:
                 if self.tried > 0:
                     self.print('Login Success!')
                 self.tried = 0
+                refresh = False
             except:
                 try:
                     re = self.send('login')
