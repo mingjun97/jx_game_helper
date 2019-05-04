@@ -164,7 +164,10 @@ def setInterval(id, interval='N'):
 def restartUser(id):
     tmp = dict()
     for k in lookuptable:
-        tmp[k] = accounts[id].__dict__[k]
+        try:
+            tmp[k] = accounts[id].__dict__[k]
+        except:
+            pass
     accounts[id] = Account(**tmp)
     return redirect("/user/%s" % id)
 
