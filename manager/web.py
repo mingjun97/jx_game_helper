@@ -175,10 +175,16 @@ def restartUser(id):
 def index():
     web = ''
     for k in rank_list:
+        status = 'green' if accounts[k].active else 'red', accounts[k].username
+        try:
+            if accounts[k].status['position'] == accounts[k].aim:
+                status = 'blue'
+        except:
+            pass
         web += """
         <a href='/user/%s' style='color: %s'>%s</a>
         <br/>
-        """ %(k,'green' if accounts[k].active else 'red', accounts[k].username)
+        """ %(k, status)
     return web
 
 if __name__ == '__main__':
