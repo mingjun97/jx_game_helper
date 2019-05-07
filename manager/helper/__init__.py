@@ -369,7 +369,7 @@ class Account:
                         wps = self.send('item')['weapons']
                         for i in wps:
                             sleep(random() * 2)
-                            if wps[i]['weaponId'] != self.weapon:
+                            if wps[i]['weaponId'] != self.weapon and wps[i]['state'] != 1:
                                 continue
                             if wps[i]['quality'] < (3 + self.only_best) and wps[i]['level'] == 0:
                                 self.send('destroy', i)
