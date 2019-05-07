@@ -61,6 +61,7 @@ class Account:
             self.tmpl["DeviceModelDetail"] = kwargs['device'].replace('_', ',')
         if 'appId' in kwargs and kwargs['appId'] != '':
             self.tmpl['appId'] = kwargs['appId']
+            self.appId = kwargs['appId']
         self.interval = int(interval)
         self.status = dict()
         self.aim = None
@@ -392,7 +393,15 @@ class Account:
                     except:
                         pass
                 if self.automove and not move_busy:
-                    if self.status['position'] == '1_1' and self.aim == '1_1':
+                    quests = self.getQuest()
+                    if 'm006' in quests:
+                        try:
+                            if self.aim != json.loads(quests['m006']['exts'])['coord']:
+                                self.aim = json.loads(quests['m006']['exts'])['coord']
+                                self.print("Detect ongoing transport task. Set it as target!")
+                        except:
+                            pass
+                    elif self.status['position'] == '1_1' and self.aim == '1_1':
                         self.aim = '300_300'
                         self.print('[Automove] Set target as 300_300')
                     elif self.aim == None or (self.status['position'] == '300_300' and self.aim == '300_300'):
