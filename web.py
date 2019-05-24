@@ -1,5 +1,4 @@
 from flask import Flask, redirect
-import flask_login
 from helper import Account
 
 accounts = dict()
