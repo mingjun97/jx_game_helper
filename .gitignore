@@ -1,4 +1,4 @@
-**/logs
+logs
 __pycache__
-**/configs
+configs
 nohup.out
