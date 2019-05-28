@@ -83,6 +83,18 @@ def user(id):
     result += 'Target: <a href="/target/%s/N">%s</a> <br/>' % (id,accounts[id].aim)
     result += "<br/>"
 
+
+    result += '<a href="/refresh_weapon/%s">Weapons(Fly)</a>: ' + \
+        ("" if not accounts[id].fly_sword else '[<a style="color: %s" href="/fly_with/%s/N">%s+%d</a>]&nbsp;&nbsp;' % (['gray', 'green', 'blue', 'red'][accounts[id].weapons[accounts[id].fly_sword]['quality'] - 1],
+        id, accounts[id].weapons[accounts[id].fly_sword]['weaponId'], accounts[id].weapons[accounts[id].fly_sword]['level']))
+    for i in accounts[id].weapons:
+        result += '<a href="/fly_with/%s/%s" style="color: %s">%s+%d</a> &nbsp;&nbsp;' % (id,i, 
+        ['gray', 'green', 'blue', 'red'][accounts[id].weapons[i]['quality'] - 1],
+        accounts[id].weapons[i]['weaponId'], accounts[id].weapons[i]['level'])
+    result += "<br/>"
+    result += "<br/>"
+
+
     if 'unlock_weapons' in accounts[id].status:
         result += 'Set automake weapon(%d)' % accounts[id].refine_queue_capacity
         if accounts[id].weapon:
@@ -99,9 +111,20 @@ def user(id):
     result += accounts[id].getLogs()
     return result
 
+@app.route('/refresh_weapon/<string:id>')
+def refresh_weapon(id):
+    accounts[id].refresh_weapon()
+    return redirect('/user/%s' % id)
+
+@app.route('/fly_with/<string:id>/<string:wid>')
+def fly_with(id, wid):
+    accounts[id].fly_sword = wid
+    return redirect('/user/%s' % id)
+
 @app.route('/only-best/<string:id>')
 def onlyBest(id):
     accounts[id].only_best = 1
+    return redirect('/user/%s' % id)
 
 @app.route('/set-weapon/<string:id>/<string:weapon>')
 def setWeapon(id, weapon):

@@ -6,9 +6,10 @@ from random import random
 import os
 cwd = os.getcwd()
 
-saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best', 'refine_queue_capacity', 'headers', 'tmpl']
+saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best', 'refine_queue_capacity', 'headers', 'tmpl', 'fly_sword']
 
 class Account:
+    map_data = {}
     def __init__(self, url, user_id, device_id, apns_token='', gdevice_id = None, fversion='1.792', plform='iOS', interval=10, **kwargs):
         self.headers = {
             "Content-Type": "application/x-www-form-urlencoded;",
@@ -18,6 +19,7 @@ class Account:
             "Accept-Encoding": "gzip, deflate",
             "Connection": "close",
         }
+        self.transport = False
         self.tmpl = {
               "appId": "com.akmob.xiuzhen",
               "guid": "49-30-23A273",
@@ -34,8 +36,11 @@ class Account:
               "action": "placeholder"
              }
         self.active = True
+        self.fly_sword = None
+        self.weapons = dict()
         self.last_active = time()
         self.url = url
+        self.map_data[url] = dict()
         self.user_id = user_id
         self.device_id = device_id
         self.tried = 0
@@ -178,6 +183,13 @@ class Account:
         elif "use" in action:
             tmp['action'] = 'handler/gameserver/item/UseItem'
             tmp['id'] = op
+        elif "town" in action:
+            tmp['action'] = 'handler/gameserver/map/SignTown'
+            tmp['des'] = op
+        elif "fly" in action:
+            tmp['action'] = 'handler/gameserver/map/FlyMove'
+            tmp['des'] = op.split(':')[0]
+            tmp['weaponId'] = op.split(':')[1]
         return tmp
 
     def send(self, action, op=''):
@@ -252,6 +264,27 @@ class Account:
         p[1] = int(p[1])
         aim[0] = int(aim[0])
         aim[1] = int(aim[1])
+        if not self.transport and self.fly_sword:
+            if p[1] == 300:
+                self.send('fly', "%d_1:%s" % (p[0], self.fly_sword))
+            else:
+                self.send('fly', "%d_300:%s" % (p[0], self.fly_sword))
+            self.print("Fly~")
+            return
+        des = self.generate_target()
+        if des:
+            if not self.transport:
+                self.send('move', des)
+                self.print("Move to %s" % des)
+                return
+            else:
+                d = des.split('_')
+                d[0] = int(d[0])
+                d[1] = int(d[1])
+                if (p[0] <= d[0] <= aim[0] or p[0] >= d[0] >= aim[0]) and (p[1] <= d[1] <= aim[1] or p[1] >= d[1] >= aim[1]):
+                    self.send('move', des)
+                    self.print("Move to %s" % des)
+                    return
         if p[1] < aim[1]:
             des = "%d_%d" %(p[0], p[1] + 1)
         elif p[1] > aim[1]:
@@ -312,6 +345,28 @@ class Account:
             self.claim(json.loads(b['quests']['m001']['exts'])['coord'])
         except:
             pass
+    
+    def generate_target(self):
+        try:
+            p = self.status['position'].split('_')
+            if self.world_map[self.url]['%d_%d' % ( p[0] - 1, p[1])] == 'plain':
+                return '%d_%d' % ( p[0] - 1, p[1])
+            elif self.world_map[self.url]['%d_%d' % ( p[0] + 1, p[1])] == 'plain':
+                return '%d_%d' % ( p[0] + 1, p[1])
+            elif self.world_map[self.url]['%d_%d' % ( p[0], p[1] - 1)] == 'plain':
+                return '%d_%d' % ( p[0], p[1] - 1)
+            elif self.world_map[self.url]['%d_%d' % ( p[0], p[1] + 1)] == 'plain':
+                return '%d_%d' % ( p[0], p[1] + 1)
+        except KeyError:
+            r = self.send('getmap')['worldMap']['map_list']
+            for i in r:
+                self.map_data[self.url][i['gridId']] = i['terrain']
+            return self.generate_target()
+        return False
+    
+    def refresth_weapons(self):
+        wps = self.send('item')['weapons']
+        self.weapons = wps
 
     def keeper(self):
         self.active_thread += 1
@@ -352,7 +407,7 @@ class Account:
                     if i.get('exts', False):
                         if 'UpgradeMeridianDone.gv' in i['exts'] or 'UpgradeMagicDone.gv' in i['exts']:
                             meridian_busy += 1
-                        elif 'WalkMove' in i['exts'] or 'Fly' in i['exts']:
+                        elif 'WalkMove' in i['exts'] or ('Fly' in i['exts'] and 'Npc' not in i['exts']):
                             move_busy = True
                         elif 'MakeWeaponDone.gv' in i['exts']:
                             make_busy += 1
@@ -399,12 +454,15 @@ class Account:
                             if self.aim != json.loads(quests['m006']['exts'])['coord']:
                                 self.aim = json.loads(quests['m006']['exts'])['coord']
                                 self.print("Detect ongoing transport task. Set it as target!")
+                                self.transport = True
                         except:
                             pass
                     elif self.status['position'] == '1_1' and self.aim == '1_1':
+                        self.transport = False
                         self.aim = '300_300'
                         self.print('[Automove] Set target as 300_300')
                     elif self.aim == None or (self.status['position'] == '300_300' and self.aim == '300_300'):
+                        self.transport = False
                         self.aim = '1_1'
                         self.print('[Automove] Set target as 1_1')
                 if not move_busy and self.aim and self.aim != self.status['position']:
