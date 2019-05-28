@@ -83,14 +83,17 @@ def user(id):
     result += 'Target: <a href="/target/%s/N">%s</a> <br/>' % (id,accounts[id].aim)
     result += "<br/>"
 
-
-    result += '<a href="/refresh_weapon/%s">Weapons(Fly)</a>: ' % id + \
-        ("" if not accounts[id].fly_sword else '[<a style="color: %s" href="/fly_with/%s/N">%s+%d</a>]&nbsp;&nbsp;' % (['gray', 'green', 'blue', 'red'][accounts[id].weapons[accounts[id].fly_sword]['quality'] - 1],
-        id, accounts[id].weapons[accounts[id].fly_sword]['weaponId'], accounts[id].weapons[accounts[id].fly_sword]['level']))
-    for i in accounts[id].weapons:
-        result += '<a href="/fly_with/%s/%s" style="color: %s">%s+%d</a> &nbsp;&nbsp;' % (id,i, 
-        ['gray', 'green', 'blue', 'red'][accounts[id].weapons[i]['quality'] - 1],
-        accounts[id].weapons[i]['weaponId'], accounts[id].weapons[i]['level'])
+    result += '<a href="/refresh_weapon/%s">Weapons(Fly)</a>: ' % id
+    try:
+        result += \
+            ("" if not accounts[id].fly_sword else '[<a style="color: %s" href="/fly_with/%s/N">%s+%d</a>]&nbsp;&nbsp;' % (['gray', 'green', 'blue', 'red'][accounts[id].weapons[accounts[id].fly_sword]['quality'] - 1],
+            id, accounts[id].weapons[accounts[id].fly_sword]['weaponId'], accounts[id].weapons[accounts[id].fly_sword]['level']))
+        for i in accounts[id].weapons:
+            result += '<a href="/fly_with/%s/%s" style="color: %s">%s+%d</a> &nbsp;&nbsp;' % (id,i, 
+            ['gray', 'green', 'blue', 'red'][accounts[id].weapons[i]['quality'] - 1],
+            accounts[id].weapons[i]['weaponId'], accounts[id].weapons[i]['level'])
+    except:
+        pass
     result += "<br/>"
     result += "<br/>"
 
@@ -113,7 +116,7 @@ def user(id):
 
 @app.route('/refresh_weapon/<string:id>')
 def refresh_weapon(id):
-    accounts[id].refresh_weapon()
+    accounts[id].refresh_weapons()
     return redirect('/user/%s' % id)
 
 @app.route('/fly_with/<string:id>/<string:wid>')
@@ -169,6 +172,7 @@ def getTreasure(id, pos='N'):
 
 @app.route('/target/<string:id>/<string:pos>')
 def setTarget(id, pos='N'):
+    accounts[id].transport = False
     if '_' not in pos:
         accounts[id].setTarget(None)
         return "Please Specific The destinition parameters."

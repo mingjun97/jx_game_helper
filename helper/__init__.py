@@ -6,7 +6,9 @@ from random import random
 import os
 cwd = os.getcwd()
 
-saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best', 'refine_queue_capacity', 'headers', 'tmpl', 'fly_sword']
+import logging
+
+saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best', 'refine_queue_capacity', 'headers', 'tmpl', 'fly_sword', 'transport']
 
 class Account:
     map_data = {}
@@ -19,7 +21,6 @@ class Account:
             "Accept-Encoding": "gzip, deflate",
             "Connection": "close",
         }
-        self.transport = False
         self.tmpl = {
               "appId": "com.akmob.xiuzhen",
               "guid": "49-30-23A273",
@@ -36,6 +37,7 @@ class Account:
               "action": "placeholder"
              }
         self.active = True
+        self.transport = False
         self.fly_sword = None
         self.weapons = dict()
         self.last_active = time()
@@ -349,22 +351,29 @@ class Account:
     def generate_target(self):
         try:
             p = self.status['position'].split('_')
-            if self.world_map[self.url]['%d_%d' % ( p[0] - 1, p[1])] == 'plain':
+            p[0] = int(p[0])
+            p[1] = int(p[1])
+            if self.map_data[self.url]['%d_%d' % ( p[0] - 1, p[1])] == 'plain':
                 return '%d_%d' % ( p[0] - 1, p[1])
-            elif self.world_map[self.url]['%d_%d' % ( p[0] + 1, p[1])] == 'plain':
+            elif self.map_data[self.url]['%d_%d' % ( p[0] + 1, p[1])] == 'plain':
                 return '%d_%d' % ( p[0] + 1, p[1])
-            elif self.world_map[self.url]['%d_%d' % ( p[0], p[1] - 1)] == 'plain':
+            elif self.map_data[self.url]['%d_%d' % ( p[0], p[1] - 1)] == 'plain':
                 return '%d_%d' % ( p[0], p[1] - 1)
-            elif self.world_map[self.url]['%d_%d' % ( p[0], p[1] + 1)] == 'plain':
+            elif self.map_data[self.url]['%d_%d' % ( p[0], p[1] + 1)] == 'plain':
                 return '%d_%d' % ( p[0], p[1] + 1)
         except KeyError:
-            r = self.send('getmap')['worldMap']['map_list']
-            for i in r:
-                self.map_data[self.url][i['gridId']] = i['terrain']
-            return self.generate_target()
+            try:
+                r = self.send('getmap', self.status['position'])['worldMap']['map_list']
+                for i in r:
+                    self.map_data[self.url][i['gridId']] = i['terrain']
+                return self.generate_target()
+            except:
+                logging.exception("!!")    
+        except Exception as e:
+            logging.exception("??")
         return False
     
-    def refresth_weapons(self):
+    def refresh_weapons(self):
         wps = self.send('item')['weapons']
         self.weapons = wps
 
