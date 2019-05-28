@@ -84,7 +84,7 @@ def user(id):
     result += "<br/>"
 
 
-    result += '<a href="/refresh_weapon/%s">Weapons(Fly)</a>: ' + \
+    result += '<a href="/refresh_weapon/%s">Weapons(Fly)</a>: ' % id + \
         ("" if not accounts[id].fly_sword else '[<a style="color: %s" href="/fly_with/%s/N">%s+%d</a>]&nbsp;&nbsp;' % (['gray', 'green', 'blue', 'red'][accounts[id].weapons[accounts[id].fly_sword]['quality'] - 1],
         id, accounts[id].weapons[accounts[id].fly_sword]['weaponId'], accounts[id].weapons[accounts[id].fly_sword]['level']))
     for i in accounts[id].weapons:
@@ -118,7 +118,10 @@ def refresh_weapon(id):
 
 @app.route('/fly_with/<string:id>/<string:wid>')
 def fly_with(id, wid):
-    accounts[id].fly_sword = wid
+    if wid != 'N':
+        accounts[id].fly_sword = wid
+    else:
+        accounts[id].fly_sword = None
     return redirect('/user/%s' % id)
 
 @app.route('/only-best/<string:id>')
