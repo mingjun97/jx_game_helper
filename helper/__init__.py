@@ -3,6 +3,7 @@ from urllib import request
 import json
 from time import sleep, localtime, strftime, time
 from random import random
+from urllib.parse import urlencode
 import os
 cwd = os.getcwd()
 
@@ -12,6 +13,7 @@ saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best', 
 
 class Account:
     map_data = {}
+    secret_key = "SCU51660T2bf9b53e8be2e4d55336e180dc6f4e785cddfbfd1460e"
     def __init__(self, url, user_id, device_id, apns_token='', gdevice_id = None, fversion='1.792', plform='iOS', interval=10, **kwargs):
         self.headers = {
             "Content-Type": "application/x-www-form-urlencoded;",
@@ -49,6 +51,7 @@ class Account:
         self.only_best = 0
         self.refine_queue_capacity = 1
         self.active_thread = 0
+        self.position_notified = False
         try:
             with open('%s/logs/%s.log' % (cwd, user_id), 'r') as logs:
                 self.log = "\n\n\n----------- Saved log ------------\n" + logs.read()
@@ -362,6 +365,8 @@ class Account:
             elif self.map_data[self.url]['%d_%d' % ( p[0], p[1] + 1)] == 'plain':
                 return '%d_%d' % ( p[0], p[1] + 1)
         except KeyError:
+            if p[0] == 1 or p[0] == 300 or p[1] == 0 or p[1] == 300:
+                return False
             try:
                 r = self.send('getmap', self.status['position'])['worldMap']['map_list']
                 for i in r:
@@ -377,9 +382,14 @@ class Account:
         wps = self.send('item')['weapons']
         self.weapons = wps
 
+    def notify(self, title, desp = ""):
+        req = request.Request("https://sc.ftqq.com/%s.send" % self.secret_key, data=urlencode({b"text": ("%s - %s" % (title, self.username)).encode('utf-8') , b"desp": desp.encode('utf-8')}).encode('utf-8'))
+        request.urlopen(req)
+
     def keeper(self):
         self.active_thread += 1
         me = self.active_thread
+        self.notify("o0新线程启动0o", "当前线程号为 %d" % me)
         while self.active:
             if me != self.active_thread:
                 self.print("Duplicated thread! Thread-%d exited to avoid wasting!" % me)
@@ -478,6 +488,12 @@ class Account:
                     self.move()
                 if self.autostudy and meridian_busy == 0:
                     self.upgradeMerdian()
+                if self.aim == self.status['position']:
+                    if not self.position_notified:
+                        self.notify("o0已到达目的地0o")
+                        self.position_notified = True
+                else:
+                    self.position_notified = False
 
                 if self.status['daily_award']:
                     self.send('dailyaward')
@@ -487,6 +503,7 @@ class Account:
                     self.claim_daily()
                 self.last_heartbeat = "Last Heartbeat: " + strftime("%Y-%m-%d %H:%M:%S", localtime()) + '<br/><br/>'
                 if self.tried > 0:
+                    self.notify("Online Notification")
                     self.print('Login Success!')
                 self.tried = 0
                 refresh = False
@@ -495,9 +512,11 @@ class Account:
                     re = self.send('login')
                     refresh = True
                     self.print('Trying Login...')
+                    # self.notify("o00o")                    
                     sleep(3)
                     self.tried += 1
                     if self.tried > 3:
+                        self.notify("o0掉线通知0o")
                         self.print('Login Failed! Exited!')
                         self.active = False
                 except:
