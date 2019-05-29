@@ -46,6 +46,7 @@ class Account:
         self.url = url
         self.map_data[url] = dict()
         self.user_id = user_id
+        self.resource_alert = False
         self.device_id = device_id
         self.tried = 0
         self.only_best = 0
@@ -389,7 +390,7 @@ class Account:
     def keeper(self):
         self.active_thread += 1
         me = self.active_thread
-        self.notify("o0新线程启动0o", "当前线程号为 %d" % me)
+        # self.notify("o0新线程启动0o", "当前线程号为 %d" % me)
         while self.active:
             if me != self.active_thread:
                 self.print("Duplicated thread! Thread-%d exited to avoid wasting!" % me)
@@ -417,6 +418,18 @@ class Account:
                 self.status['resource_max'] = re['resource_data']['resource_max']
                 self.status['dailyquest_ok_count'] = re['dailyquest_ok_count']
                 self.status['invest'] = re['user_other'].get("investProfits", {})
+
+                if self.resource_alert:
+                    self.resource_alert = False
+                    for i in self.status['resource']:
+                        if self.status['resource'][i] <= self.status['resource_max'] * 0.05:
+                            self.resource_alert = True
+                else:
+                    for i in self.status['resource']:
+                        if self.status['resource'][i] <= self.status['resource_max'] * 0.05:
+                            self.resource_alert = True
+                            self.notify("o0真气不足0o")
+                            break
 
                 re = self.send('event')
                 meridian_busy = 0
@@ -503,7 +516,7 @@ class Account:
                     self.claim_daily()
                 self.last_heartbeat = "Last Heartbeat: " + strftime("%Y-%m-%d %H:%M:%S", localtime()) + '<br/><br/>'
                 if self.tried > 0:
-                    self.notify("Online Notification")
+                    # self.notify("Online Notification")
                     self.print('Login Success!')
                 self.tried = 0
                 refresh = False
