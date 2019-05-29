@@ -4,6 +4,7 @@ import json
 from time import sleep, localtime, strftime, time
 from random import random
 from urllib.parse import urlencode
+from .config import secret_key
 import os
 cwd = os.getcwd()
 
@@ -13,7 +14,6 @@ saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best', 
 
 class Account:
     map_data = {}
-    secret_key = "SCU51660T2bf9b53e8be2e4d55336e180dc6f4e785cddfbfd1460e"
     def __init__(self, url, user_id, device_id, apns_token='', gdevice_id = None, fversion='1.792', plform='iOS', interval=10, **kwargs):
         self.headers = {
             "Content-Type": "application/x-www-form-urlencoded;",
@@ -383,7 +383,7 @@ class Account:
         self.weapons = wps
 
     def notify(self, title, desp = ""):
-        req = request.Request("https://sc.ftqq.com/%s.send" % self.secret_key, data=urlencode({b"text": ("%s - %s" % (title, self.username)).encode('utf-8') , b"desp": desp.encode('utf-8')}).encode('utf-8'))
+        req = request.Request("https://sc.ftqq.com/%s.send" % secret_key, data=urlencode({b"text": ("%s - %s" % (title, self.username)).encode('utf-8') , b"desp": desp.encode('utf-8')}).encode('utf-8'))
         request.urlopen(req)
 
     def keeper(self):
