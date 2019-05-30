@@ -196,6 +196,9 @@ class Account:
             tmp['action'] = 'handler/gameserver/map/FlyMove'
             tmp['des'] = op.split(':')[0]
             tmp['weaponId'] = op.split(':')[1]
+        elif "enter" in action:
+            tmp['action'] = 'handler/gameserver/quest/SurrenderNpcWin'
+            tmp['npc'] = 'm4'
         return tmp
 
     def send(self, action, op=''):

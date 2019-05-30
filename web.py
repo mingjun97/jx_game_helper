@@ -1,5 +1,8 @@
-from flask import Flask, redirect
+from flask import Flask, redirect, request
 from helper import Account
+from flask_login import LoginManager, login_user, login_required
+
+
 
 accounts = dict()
 rank_list = list()
@@ -16,6 +19,24 @@ lookuptable = {
     'device': 6,
     'appId': 7
 }
+app.secret_key = b'_5#y2L"F4?.Q8z\n\xec]/'
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+@login_manager.user_loader
+
+class User():
+    is_authenticated = True
+    is_active = True 
+    is_anonymous = False
+    def __init__(self, uid):
+        self.uid = uid
+    def get_id(self):
+        return ("%d" % self.uid).encode('utf-8')
+
+def load_user(user_id):
+    return User(user_id)
 
 redirect_message = "<br/> Redirect in 2 seconds. <script> setTimeout(function(){window.history.back()}, 2000)</script>"
 def lookup(d, k):
@@ -34,27 +55,48 @@ for i in a.split('\n'):
         # print(tmp)
         accounts[cur] = Account(**tmp)
 
+@app.route('/login', methods=['GET'])
+def login():
+        return """
+<form method='POST'>
+    <input name='username'/><br/>
+    <input name='password' type='password'/><br/>
+    <input type='submit' value='login'/>
+</form>"""
+
+@app.route('/login', methods=['POST'])
+def login_post():
+    if request.form['username'] == 'mingjun97' and request.form['password'] == 'hu3tc4':
+        login_user(User(1))
+    return redirect('/')
+
+
 @app.route('/user/autostudy/<string:id>')
+@login_required
 def setAutostudy(id):
     accounts[id].setAutostudy()
     return redirect('/user/%s' % id)
 
 @app.route('/user/automove/<string:id>')
+@login_required
 def setAutomove(id):
     accounts[id].setAutomove()
     return redirect('/user/%s' % id)
 
 @app.route('/user/<string:id>/save')
+@login_required
 def save(id):
     accounts[id].saveConfig()
     return redirect('/user/%s' % id)
 
 @app.route('/user/<string:id>/load')
+@login_required
 def load(id):
     accounts[id].readConfig()
     return redirect('/user/%s' % id)
 
 @app.route('/user/<string:id>')
+@login_required
 def user(id):
     result = '<h1>%s</h1>' % accounts[id].username
     result += 'Save Config: <a href="/user/%s/save"> Save </a><br/>' % id
@@ -115,11 +157,13 @@ def user(id):
     return result
 
 @app.route('/refresh_weapon/<string:id>')
+@login_required
 def refresh_weapon(id):
     accounts[id].refresh_weapons()
     return redirect('/user/%s' % id)
 
 @app.route('/fly_with/<string:id>/<string:wid>')
+@login_required
 def fly_with(id, wid):
     if wid != 'N':
         accounts[id].fly_sword = wid
@@ -128,11 +172,13 @@ def fly_with(id, wid):
     return redirect('/user/%s' % id)
 
 @app.route('/only-best/<string:id>')
+@login_required
 def onlyBest(id):
     accounts[id].only_best = 1
     return redirect('/user/%s' % id)
 
 @app.route('/set-weapon/<string:id>/<string:weapon>')
+@login_required
 def setWeapon(id, weapon):
     if weapon == 'Unset':
         accounts[id].setWeapon(None)
@@ -141,16 +187,19 @@ def setWeapon(id, weapon):
     return redirect('/user/%s' % id)
 
 @app.route('/up-weapon-capacity/<string:id>')
+@login_required
 def upWeaponCapicity(id):
     accounts[id].refine_queue_capacity += 1
     return redirect('/user/%s' % id)
 
 @app.route('/down-weapon-capacity/<string:id>')
+@login_required
 def downWeaponCapicity(id):
     accounts[id].refine_queue_capacity -= 1
     return redirect('/user/%s' % id)
 
 @app.route('/treasure/<string:id>/<string:pos>')
+@login_required
 def getTreasure(id, pos='N'):
     accounts[id].gotTreasures()
     b = accounts[id].send('item')['items']
@@ -171,6 +220,7 @@ def getTreasure(id, pos='N'):
     #         return "Wrong destinition."
 
 @app.route('/target/<string:id>/<string:pos>')
+@login_required
 def setTarget(id, pos='N'):
     accounts[id].transport = False
     if '_' not in pos:
@@ -181,6 +231,7 @@ def setTarget(id, pos='N'):
         return "Got it!" + redirect_message
 
 @app.route('/set-interval/<string:id>/<string:interval>')
+@login_required
 def setInterval(id, interval='N'):
     if interval == 'N':
         return 'Please specific the interval value.'
@@ -190,6 +241,7 @@ def setInterval(id, interval='N'):
     return redirect('/user/' + id)
 
 @app.route('/restart/<string:id>')
+@login_required
 def restartUser(id):
     tmp = dict()
     for k in lookuptable:
@@ -201,6 +253,7 @@ def restartUser(id):
     return redirect("/user/%s" % id)
 
 @app.route('/')
+@login_required
 def index():
     web = ''
     for k in rank_list:
