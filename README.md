@@ -7,6 +7,7 @@ This is a bot clent for WuXingXiuZhen-JianXian with the feature of supportting b
 ```
 python3
  - flask
+ - flask-login
 ```
 
 ## Usage
