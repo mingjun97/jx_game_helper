@@ -199,6 +199,10 @@ class Account:
         elif "enter" in action:
             tmp['action'] = 'handler/gameserver/quest/SurrenderNpcWin'
             tmp['npc'] = 'm4'
+        elif "7day" in action:
+            tmp['action'] = 'handler/gameserver/account/Got7DayLoginReward'
+        elif "share" in action:
+            tmp['action'] = 'handler/gameserver/account/GotShareReward'
         return tmp
 
     def send(self, action, op=''):
@@ -330,6 +334,9 @@ class Account:
                     pass
         if unfinished < 4:
             self.send('dd', unfinished)
+            if (unfinished == 1):
+                self.send('share')
+                self.print("Claim share award")
             self.print('Claim daily award %d' % unfinished)
 
     def setAutostudy(self, enable=None):
