@@ -89,6 +89,10 @@ def save(id):
     accounts[id].saveConfig()
     return redirect('/user/%s' % id)
 
+@app.route('/newbie/<string:id>/<int:times>')
+def activeNewbie(id, times):
+    accounts[id].activeNewbie(times)
+
 @app.route('/user/<string:id>/load')
 @login_required
 def load(id):
@@ -126,6 +130,12 @@ def user(id):
     result += "<br/>"
 
     result += '<a href="/refresh_weapon/%s">Weapons(Fly)</a>: ' % id
+    result += "<br/>"
+
+    result += '<a href="/newbie/%s/1">1 NEWBIE</a> &nbsp;&nbsp;' % id
+    result += '<a href="/newbie/%s/5">5 NEWBIE</a> &nbsp;&nbsp;' % id
+    result += '<a href="/newbie/%s/10">10 NEWBIE</a> &nbsp;&nbsp;' % id
+
     try:
         result += \
             ("" if not accounts[id].fly_sword else '[<a style="color: %s" href="/fly_with/%s/N">%s+%d</a>]&nbsp;&nbsp;' % (['gray', 'green', 'blue', 'red'][accounts[id].weapons[accounts[id].fly_sword]['quality'] - 1],

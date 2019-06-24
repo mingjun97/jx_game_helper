@@ -203,6 +203,8 @@ class Account:
             tmp['action'] = 'handler/gameserver/account/Got7DayLoginReward'
         elif "share" in action:
             tmp['action'] = 'handler/gameserver/account/GotShareReward'
+        elif "newbie" in action:
+            tmp['action'] = 'handler/gameserver/account/NewbieOver'
         return tmp
 
     def send(self, action, op=''):
@@ -396,6 +398,10 @@ class Account:
     def notify(self, title, desp = ""):
         req = request.Request("https://sc.ftqq.com/%s.send" % secret_key, data=urlencode({b"text": ("%s - %s" % (title, self.username)).encode('utf-8') , b"desp": desp.encode('utf-8')}).encode('utf-8'))
         request.urlopen(req)
+    
+    def activeNewbie(self, times=1):
+        for _ in range(times):
+            self.send('newbie')
 
     def keeper(self):
         self.active_thread += 1
