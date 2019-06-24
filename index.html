@@ -1,0 +1,95 @@
+<html>
+    <head>
+        <title>
+            修真管理后台
+        </title>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script>
+            var current = null;
+            function update_status(){
+                $.post('/api/getStatus', JSON.stringify({uid: current.value}), (data)=>{
+                    var a = $('#datas')[0];
+                    a.innerHTML = ''
+                    $.each(data, (item, value) => {
+                        a.innerHTML += `
+                            <tr>
+                                <th>${item}</th>
+                                <th>${JSON.stringify(value)}</th>
+                            </tr>
+                        `
+                    })
+                }, 'json')
+            }
+
+            function gotoIndex(){
+                current.value = 'index';
+                $('select').formSelect();
+                update_status();
+            };
+
+            $().ready(()=>{
+                
+
+                current = $('#accounts')[0];
+                current.onchange = update_status;
+                setInterval(function(){
+                    update_status();
+                }, 3000);
+                setTimeout(update_status, 100);
+                $.getJSON('/api/getList', (data)=>{
+                        current.innerHTML = '<option value="index" selected>Index</option>';
+                        $.each(data, (uid, value)=>{current.innerHTML += `<option value="${uid}">${value}</option>`})                     
+                        $('select').formSelect();
+                });
+                $('select').formSelect();
+            });
+            
+            let now = "";
+        </script>
+    </head>
+    <body>
+            <nav>
+                    <div class="nav-wrapper">
+                        <div class="brand-logo" style="z-index: 999;">
+                            <select id='accounts'>
+                                <option value="" selected>Index</option>
+                            </select>
+                        </div>
+                      <ul id="nav-mobile" class="right">
+                        <li>
+                        </li>
+                        <li><a onclick="gotoIndex()">Index</a></li>
+                      </ul>
+                    </div>
+            </nav>
+            <div id='main'></div>
+            <div class="row">
+                    <div class="col" style="max-width: 95vw">
+                      <div class="card blue-grey darken-1">
+                        <div class="card-content white-text">
+                          <span class="card-title">Actions</span>
+                          <table class="striped" style="word-break: break-all">
+                                <thead>
+                                  <tr>
+                                      <th>Item</th>
+                                      <th>Data</th>
+                                  </tr>
+                                </thead>
+                        
+                                <tbody id="datas">
+                                </tbody>
+                              </table>
+                        </div>
+                        <div class="card-action">
+                          <a href="#">This is a link</a>
+                        </div>
+                      </div>
+                    </div>
+            </div>
+
+            
+                        
+    </body>
+</html>

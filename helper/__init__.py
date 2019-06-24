@@ -8,6 +8,9 @@ from .config import secret_key
 import os
 cwd = os.getcwd()
 
+from .monitor import Monitor
+from .account import Character
+
 import logging
 
 saved_config = ['autostudy','aim','automove','interval', 'weapon', 'only_best', 'refine_queue_capacity', 'headers', 'tmpl', 'fly_sword', 'transport']
