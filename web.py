@@ -2,7 +2,7 @@ from flask import Flask, redirect, request
 from helper import Account
 from flask_login import LoginManager, login_user, login_required
 
-
+from threading import Thread
 
 accounts = dict()
 rank_list = list()
@@ -91,7 +91,8 @@ def save(id):
 
 @app.route('/newbie/<string:id>/<int:times>')
 def activeNewbie(id, times):
-    accounts[id].activeNewbie(times)
+    Thread(target=accounts[id].activeNewbie, args=(times,)).start()
+    return "Sent! " + redirect_message
 
 @app.route('/user/<string:id>/load')
 @login_required
