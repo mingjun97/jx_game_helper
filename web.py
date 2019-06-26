@@ -157,6 +157,7 @@ def user(id):
     result += '<a href="/newbie/%s/10">10 NEWBIE</a> &nbsp;&nbsp;' % id
     
     result += "<br/>"
+    result += "<br/>"
 
     result += '<a href="/manual-weapon/%s">Manual Clean Weapon</a>' %id
 
