@@ -55,6 +55,11 @@ for i in a.split('\n'):
         # print(tmp)
         accounts[cur] = Account(**tmp)
 
+@app.route('/manual-weapon/<string:id>')
+def manualWeapon(id):
+    Thread(target=accounts[id].cleanWeapon).start()
+    return "Sent!" + redirect_message
+
 @app.route('/login', methods=['GET'])
 def login():
         return """
@@ -133,9 +138,7 @@ def user(id):
     result += '<a href="/refresh_weapon/%s">Weapons(Fly)</a>: ' % id
     result += "<br/>"
 
-    result += '<a href="/newbie/%s/1">1 NEWBIE</a> &nbsp;&nbsp;' % id
-    result += '<a href="/newbie/%s/5">5 NEWBIE</a> &nbsp;&nbsp;' % id
-    result += '<a href="/newbie/%s/10">10 NEWBIE</a> &nbsp;&nbsp;' % id
+
 
     try:
         result += \
@@ -148,7 +151,20 @@ def user(id):
     except:
         pass
     result += "<br/>"
+
+    result += '<a href="/newbie/%s/1">1 NEWBIE</a> &nbsp;&nbsp;' % id
+    result += '<a href="/newbie/%s/5">5 NEWBIE</a> &nbsp;&nbsp;' % id
+    result += '<a href="/newbie/%s/10">10 NEWBIE</a> &nbsp;&nbsp;' % id
+    
     result += "<br/>"
+
+    result += '<a href="/manual-weapon/%s">Manual Clean Weapon</a>' %id
+
+    result += "<br/>"
+    result += "<br/>"
+    result += "<br/>"
+
+
 
 
     if 'unlock_weapons' in accounts[id].status:

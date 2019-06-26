@@ -403,6 +403,37 @@ class Account:
         for _ in range(times):
             self.send('newbie')
 
+    def cleanWeapon(self):
+        collects = dict()
+        collects2 = dict()
+        try:
+            wps = self.send('item')['weapons']
+            for i in wps:
+                sleep(random() * 2)
+                if wps[i]['weaponId'] != self.weapon and wps[i]['state'] != 1:
+                    continue
+                if wps[i]['quality'] < (3 + self.only_best) and wps[i]['level'] == 0:
+                    self.send('destroy', i)
+                    continue
+                if int(wps[i]['level']) >= 8:
+                    continue
+                if not self.only_best and wps[i]['quality'] == 3:
+                    if not collects.__contains__(wps[i]['level']):
+                        collects[wps[i]['level']] = i
+                    else:
+                        self.send('upweapon', i)
+                        self.print('Upgrade %s - %s' % (wps[i]['weaponId'], wps[i]['quality']))
+                        collects.pop(wps[i]['level'])
+                else:
+                    if not collects2.__contains__(wps[i]['level']):
+                        collects2[wps[i]['level']] = i
+                    else:
+                        self.send('upweapon', i)
+                        self.print('Upgrade %s - %s' % (wps[i]['weaponId'], wps[i]['quality']))
+                        collects2.pop(wps[i]['level'])
+        except:
+            pass
+
     def keeper(self):
         self.active_thread += 1
         me = self.active_thread
@@ -466,35 +497,7 @@ class Account:
                 if self.weapon and make_busy < self.refine_queue_capacity:
                     self.send('make', self.weapon)
                     self.print('Make 2x %s' % self.weapon)
-                    collects = dict()
-                    collects2 = dict()
-                    try:
-                        wps = self.send('item')['weapons']
-                        for i in wps:
-                            sleep(random() * 2)
-                            if wps[i]['weaponId'] != self.weapon and wps[i]['state'] != 1:
-                                continue
-                            if wps[i]['quality'] < (3 + self.only_best) and wps[i]['level'] == 0:
-                                self.send('destroy', i)
-                                continue
-                            if int(wps[i]['level']) >= 8:
-                                continue
-                            if not self.only_best and wps[i]['quality'] == 3:
-                                if not collects.__contains__(wps[i]['level']):
-                                    collects[wps[i]['level']] = i
-                                else:
-                                    self.send('upweapon', i)
-                                    self.print('Upgrade %s - %s' % (wps[i]['weaponId'], wps[i]['quality']))
-                                    collects.pop(wps[i]['level'])
-                            else:
-                                if not collects2.__contains__(wps[i]['level']):
-                                    collects2[wps[i]['level']] = i
-                                else:
-                                    self.send('upweapon', i)
-                                    self.print('Upgrade %s - %s' % (wps[i]['weaponId'], wps[i]['quality']))
-                                    collects2.pop(wps[i]['level'])
-                    except:
-                        pass
+                    self.cleanWeapon()
                 if self.automove and not move_busy:
                     quests = self.getQuest()
                     if 'm006' in quests:
